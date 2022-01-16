@@ -1,0 +1,27 @@
+{
+  "name": "confetti-iwms-app",
+  "version": "1.0.0",
+  "description": "Confetti Inventory and Warehouses Management System application",
+  "main": "server.js",
+  "scripts": {
+    "server": "node server.js --production",
+    "build": "npm run build --prefix client/",
+    "dev": "concurrently \"nodemon server.js\" \"npm run serve --prefix client/\""
+  },
+  "author": "Kirill Makeev, EasyOneWeb LLC",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.1",
+    "express": "^4.17.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.1.5",
+    "passport": "^0.5.2",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^6.1.0"
+  },
+  "devDependencies": {
+    "concurrently": "^7.0.0",
+    "nodemon": "^2.0.15"
+  }
+}
