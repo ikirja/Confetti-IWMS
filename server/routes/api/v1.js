@@ -5,10 +5,14 @@ const router = Router();
 const {
   authController,
   customerController,
+  logController,
   orderController,
   productController,
+  registryController,
+  userController,
   warehouseController,
-  orderStatusController
+  orderStatusController,
+  marketplace
 } = require('./v1/frontend');
 
 //**************
@@ -31,6 +35,8 @@ router.post('/warehouse/product', authController.middleware.isAdmin, warehouseCo
 router.post('/warehouse/set-default', authController.middleware.isAdmin, warehouseController.middleware.checkForDefaultWarehouse, warehouseController.setDefaultWarehouse);
 router.post('/warehouse/unset-default', authController.middleware.isAdmin, warehouseController.unsetDefaultWarehouse);
 router.post('/warehouse/move', authController.middleware.isAdmin, warehouseController.moveFromToWarehouse);
+router.get('/warehouse/connection', authController.middleware.isAdmin, warehouseController.getConnections);
+router.post('/warehouse/connection', authController.middleware.isAdmin, warehouseController.setConnection);
 router.get('/warehouse/:warehouseId', authController.middleware.isAdmin, warehouseController.getWarehouse);
 
 // ORDERS
@@ -48,5 +54,25 @@ router.get('/order-status', authController.middleware.isAdmin, orderStatusContro
 // CUSTOMERS
 router.get('/customer', authController.middleware.isAdmin, customerController.getCustomers);
 router.post('/customer', authController.middleware.isAdmin, customerController.setCustomer);
+
+// REGISTRIES
+router.get('/registry', authController.middleware.isAdmin, registryController.getRegistries);
+router.get('/registry/:id', authController.middleware.isAdmin, registryController.getRegistry);
+
+// LOGS
+router.get('/log', authController.middleware.isAdmin, logController.getLogs);
+router.get('/log/:id', authController.middleware.isAdmin, logController.getLog);
+
+// USERS
+router.get('/user', authController.middleware.isAdmin, userController.getUsers);
+router.get('/user/:id', authController.middleware.isAdmin, userController.getUser);
+
+// MARKETPLACE
+// Ozon Seller Api
+router.get('/marketplace/ozon/get-category-tree', authController.middleware.isAdmin, marketplace.ozonSellerApi.getCategoryTree);
+router.post('/marketplace/ozon/get-category-attribute', authController.middleware.isAdmin, marketplace.ozonSellerApi.getCategoryAttribute);
+router.post('/marketplace/ozon/get-category-attribute-values', authController.middleware.isAdmin, marketplace.ozonSellerApi.getCategoryAttributeValues);
+router.get('/marketplace/ozon/get-config', authController.middleware.isAdmin, marketplace.ozonSellerApi.getConfig);
+router.post('/marketplace/ozon/set-config', authController.middleware.isAdmin, marketplace.ozonSellerApi.setConfig);
 
 module.exports = router;

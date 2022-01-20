@@ -55,6 +55,7 @@
         <th>Закупочная цена</th>
         <th>Цена</th>
         <th>Количество</th>
+        <th v-if="warehouse?.connection !== 'default'">Категория</th>
       </tr>
     </thead>
     <tbody>
@@ -149,7 +150,7 @@
         v-if="!loading"
         @click.prevent="setProducts"
         class="btn btn-success mb-2"
-        :disabled="products.length === 0"
+        :disabled="!products.some(product => product.checked)"
       >
         <i class="mdi mdi-content-save-all me-2"></i> Добавить на склад
       </button>
@@ -171,7 +172,7 @@ import { useStore } from "vuex";
 import setProductsToWarehouse from '@/modules/warehouse/set-products-to-warehouse';
 
 export default {
-  props: [ 'warehouse', 'setIsDisabled' ],
+  props: [ 'setIsDisabled' ],
   setup() {
     const store = useStore();
     const warehouse = computed(() => store.state.warehouses.currentWarehouse);
@@ -221,6 +222,7 @@ export default {
     }
 
     return {
+      warehouse,
       products,
       addedProducts,
       updatedProducts,

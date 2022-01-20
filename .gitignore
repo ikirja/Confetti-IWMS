@@ -2,3 +2,4 @@
 node_modules
 HTML_TEMPLATE
 package-lock.json
+server/lib/marketplace/ozon-seller-api/config/index.json

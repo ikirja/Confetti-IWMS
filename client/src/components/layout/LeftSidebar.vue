@@ -58,7 +58,7 @@
           </div>
         </li>
 
-        <li class="side-nav-title side-nav-item">Магазин</li>
+        <li class="side-nav-title side-nav-item mt-3">Магазин</li>
 
         <router-link
           to="/ecommerce/product"
@@ -135,10 +135,52 @@
           </li>
         </router-link>
 
-        <li class="side-nav-title side-nav-item">Найстройки</li>
+        <li class="side-nav-title side-nav-item mt-3">Справочник</li>
 
         <router-link
-          to="/admin/users"
+          to="/manage/registry"
+          v-slot="{ href, isActive }"
+          custom
+        >
+          <li class="side-nav-item" :class="{ 'menuitem-active': isActive }">
+            <a :href="href" class="side-nav-link">
+              <i class="uil-file-info-alt"></i>
+              <span> Регистр сведений </span>
+            </a>
+          </li>
+        </router-link>
+
+        <li class="side-nav-title side-nav-item mt-3">Найстройки</li>
+
+        <li class="side-nav-item">
+          <a
+            data-bs-toggle="collapse"
+            href="#sidebarAdminMarketplace"
+            aria-expanded="false"
+            aria-controls="sidebarAdminMarketplace"
+            class="side-nav-link"
+          >
+            <i class="uil-store-alt"></i>
+            <span> Маркетплейсы </span>
+            <span class="menu-arrow"></span>
+          </a>
+          <div class="collapse" id="sidebarAdminMarketplace">
+            <ul class="side-nav-second-level">
+              <router-link
+                to="/admin/marketplace/ozon"
+                v-slot="{ href, isActive }"
+                custom
+              >
+                <li :class="{ 'menuitem-active': isActive }">
+                  <a :href="href">OZON</a>
+                </li>
+              </router-link>
+            </ul>
+          </div>
+        </li>
+
+        <router-link
+          to="/admin/user"
           v-slot="{ href, isActive }"
           custom
         >
@@ -146,6 +188,19 @@
             <a :href="href" class="side-nav-link">
               <i class="uil-users-alt"></i>
               <span> Пользователи </span>
+            </a>
+          </li>
+        </router-link>
+
+        <router-link
+          to="/admin/log"
+          v-slot="{ href, isActive }"
+          custom
+        >
+          <li class="side-nav-item" :class="{ 'menuitem-active': isActive }">
+            <a :href="href" class="side-nav-link">
+              <i class="uil-list-ul"></i>
+              <span> Журнал событий </span>
             </a>
           </li>
         </router-link>

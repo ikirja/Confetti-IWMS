@@ -1,5 +1,6 @@
 // Global Config
 global.__config = require('./config');
+global.__basedir = __dirname;
 
 // INIT
 const express = require('express');

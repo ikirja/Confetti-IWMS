@@ -6,7 +6,8 @@
   "scripts": {
     "server": "node server.js --production",
     "build": "npm run build --prefix client/",
-    "dev": "concurrently \"nodemon server.js\" \"npm run serve --prefix client/\""
+    "dev": "concurrently \"nodemon --insecure-http-parser server.js\" \"npm run serve --prefix client/\"",
+    "devServer": "nodemon --insecure-http-parser server.js --delay=5"
   },
   "author": "Kirill Makeev, EasyOneWeb LLC",
   "license": "ISC",
@@ -15,6 +16,7 @@
     "express": "^4.17.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.5",
+    "node-fetch": "^2.6.7",
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",

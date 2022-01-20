@@ -31,6 +31,26 @@ const routes = [
     path: '/ecommerce/customer',
     name: 'Customer',
     component: () => import('@/views/ecommerce/Customer.vue')
+  },
+  {
+    path: '/manage/registry',
+    name: 'Registry',
+    component: () => import('@/views/manage/Registry.vue')
+  },
+  {
+    path: '/admin/marketplace/ozon',
+    name: 'MarketplaceOzon',
+    component: () => import('@/views/admin/marketplace/MarketplaceOzon.vue')
+  },
+  {
+    path: '/admin/user',
+    name: 'User',
+    component: () => import('@/views/admin/User.vue')
+  },
+  {
+    path: '/admin/log',
+    name: 'Log',
+    component: () => import('@/views/admin/Log.vue')
   }
 ]
 

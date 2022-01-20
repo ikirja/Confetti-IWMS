@@ -18,6 +18,11 @@ const warehouseSchema = new Schema({
     required: true,
     default: false
   },
+  connection: {
+    type: String,
+    required: true,
+    default: 'default'
+  },
   products: [
     {
       product: {
@@ -38,9 +43,25 @@ const warehouseSchema = new Schema({
       discount: {
         type: Schema.Types.ObjectId,
         ref: 'Discount'
+      },
+      ozon: {
+        categoryId: {
+          type: Number,
+          default: 0
+        },
+        category: {
+          type: Object,
+          default: {}
+        },
+        attributes: [
+          {
+            type: Object,
+            default: {}
+          }
+        ]
       }
     }
-  ]
+  ],
 });
 
 module.exports = new model('Warehouse', warehouseSchema); 

@@ -1,9 +1,9 @@
 const Warehouse = require('../../../../../../models/warehouse');
 const validateProductsForWarehouse = require('./validate-products-for-warehouse');
+const validateProductsForWarehouseConnection = require('./validate-products-for-warehouse-connection');
 const logger = require('../../../../../../logger');
 
 module.exports = async (req, res) => {
-  // NEED TO VALIDATE PRODUCTS! AFTER GOOGLE SHEETS INTEGRATION!!
   let addedProducts = [];
   let updatedProducts = [];
   let errors = [];
@@ -14,10 +14,12 @@ module.exports = async (req, res) => {
     if (!req.body.products || req.body.products.length === 0) return res.status(422).json({ errors: [ { message: 'Товары отсутствуют' } ] });
 
     const validated = await validateProductsForWarehouse(req.body.products);
-
     if (validated.errors.length > 0) return res.status(422).json({ error: validated.errors });
 
-    validated.products.forEach(product => {
+    const validatedWithConnection = validateProductsForWarehouseConnection(validated.products, foundWarehouse.connection);
+    if (validatedWithConnection.errors.length > 0) return res.status(422).json({ error: validatedWithConnection.errors });
+
+    validatedWithConnection.products.forEach(product => {
       const index = foundWarehouse.products.findIndex(productInWarehouse => productInWarehouse.product.toString() == product.product.toString());
 
       if (index == -1) {
@@ -27,6 +29,7 @@ module.exports = async (req, res) => {
         foundWarehouse.products[index].price = product.price;
         product.quantity ? foundWarehouse.products[index].quantity = foundWarehouse.products[index].quantity + product.quantity : '';
         product.discount ? foundWarehouse.products[index].discount = product.discount : '';
+        product.ozon ? foundWarehouse.products[index].ozon = product.ozon : '';
         
         updatedProducts.push(product);
       }

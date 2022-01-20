@@ -55,6 +55,8 @@
         <th>Закупочная цена</th>
         <th>Цена</th>
         <th>Количество</th>
+        <th v-if="warehouse?.connection !== 'default'" style="width: 250px">Категория</th>
+        <th v-if="warehouse?.connection !== 'default'">Характеристики</th>
       </tr>
     </thead>
     <tbody>
@@ -139,6 +141,25 @@
             />
           </div>
         </td>
+        <td v-if="warehouse?.connection !== 'default'">
+          <SelectCategory
+            v-if="!productInWarehouse.ozon.category"
+            :product-id="productInWarehouse.product._id"
+            @selected-category="selectCategoryForProduct"
+            @remove-category-from-product="removeCategoryFromProduct"
+          />
+          <small v-if="productInWarehouse.ozon.category" class="text-secondary fw-bold">Категория: <span class="text-info">{{ productInWarehouse.ozon.category.title }}</span></small>
+        </td>
+        <td v-if="warehouse?.connection !== 'default'">
+          <button class="btn btn-primary" @click="toggleModal(productInWarehouse.product._id)" :disabled="!productInWarehouse.ozon.category">Характеристики</button>
+          <ModalAttributes
+            :show="productInWarehouse.ozon.showModal"
+            :product="productInWarehouse"
+            @select-attributes-for-product="selectAttributesForProduct"
+            @toggle-modal="toggleModal"
+          />
+          <small v-if="productInWarehouse.ozon.attributes?.length > 0" class="text-success fw-bold">Характеристики указаны</small>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -151,9 +172,9 @@
         v-if="!loading"
         @click.prevent="setProducts"
         class="btn btn-success mb-2"
-        :disabled="productsInWarehouse.length === 0"
+        :disabled="!productsInWarehouse.some(product => product.checked)"
       >
-        <i class="mdi mdi-content-save-all me-2"></i> Добавить на склад
+        <i class="mdi mdi-content-save-all me-2"></i> Сохранить изменения
       </button>
       <button v-if="loading" class="btn btn-success mb-2" disabled>
         <span
@@ -168,12 +189,20 @@
 </template>
 
 <script>
+import SelectCategory from '@/components/forms/SelectCategory.vue';
+import ModalAttributes from '@/components/modals/marketplace/ozon/ModalAttributes.vue';
+
 import { ref, onMounted, watchEffect, computed } from 'vue';
 import { useStore } from 'vuex';
+import request from '@/modules/request';
 import setProductsToWarehouse from '@/modules/warehouse/set-products-to-warehouse';
 
 export default {
   props: [ 'setIsDisabled' ],
+  components: {
+    SelectCategory,
+    ModalAttributes
+  },
   setup() {
     const store = useStore();
     const warehouse = computed(() => store.state.warehouses.currentWarehouse);
@@ -184,7 +213,7 @@ export default {
     let checkedAll = ref(false);
     let loading = ref(false);
 
-    onMounted(() => getWarehouseWithProducts());
+    onMounted(async () => await getWarehouseWithProducts());
 
     watchEffect(() => {
       if (checkedAll.value) productsInWarehouse.value.forEach(product => product.checked = true);
@@ -192,13 +221,75 @@ export default {
     });
 
     async function getWarehouseWithProducts() {
-      const response = await fetch(`/api/v1/warehouse/${warehouse.value._id}`, { headers: { token: store.state.token } });
-      const jsonData = await response.json();
+      const url = `/api/v1/warehouse/${warehouse.value._id}`;
+      const jsonData = await request(url, 'GET', store.state.token);
 
       if (jsonData.products) {
-        jsonData.products.forEach(product => product.checked = false);
+        jsonData.products.forEach(product => {
+          product.checked = false;
+          if (warehouse.value.connection === 'ozon-seller-api') product.ozon.showModal = false;
+        });
         productsInWarehouse.value = jsonData.products;
       }
+    }
+
+    async function selectCategoryForProduct({ category, productId }) {
+      productsInWarehouse.value.forEach(productInWarehouse => {
+        if (productInWarehouse.product._id.toString() === productId.toString()) {
+          productInWarehouse.ozon.categoryId = category.category_id;
+          productInWarehouse.ozon.category = category;
+        }
+      });
+    }
+
+    function removeCategoryFromProduct(productId) {
+      productsInWarehouse.value.forEach(productInWarehouse => {
+        if (productInWarehouse.product._id.toString() === productId.toString()) {
+          productInWarehouse.ozon.categoryId = null;
+          productInWarehouse.ozon.category = null;
+        }
+      });
+    }
+
+    function selectAttributesForProduct({ productInWarehouse, attributes }) {
+      let selectedAttributes = [];
+
+      attributes.forEach(attribute => {
+        if (attribute.inputValue.length > 0) {
+          let selectedAttribute = {
+            complex_id: 0,
+            id: attribute.id,
+            values: []
+          }
+
+          if (attribute.is_collection && attribute.selectedValue) {
+            selectedAttribute.values.push({
+              dictionary_value_id: attribute.selectedValue.id,
+              value: attribute.selectedValue.value
+            });
+          } else {
+            selectedAttribute.values.push({
+              value: attribute.inputValue
+            });
+          }
+
+          selectedAttributes.push(selectedAttribute);
+        }
+      });
+
+      if (selectedAttributes.length > 0) productInWarehouse.ozon.attributes = selectedAttributes;
+
+      toggleModal(productInWarehouse.product._id);
+    }
+
+    function toggleModal(productInWarehouseId) {
+      productsInWarehouse.value.forEach(productInWarehouse => {
+        if (productInWarehouse.product._id.toString() === productInWarehouseId.toString()) {
+          productInWarehouse.ozon.showModal = !productInWarehouse.ozon.showModal;
+          const body = document.querySelector("body");
+          productInWarehouse.ozon.showModal ? body.classList.add("modal-open") : body.classList.remove("modal-open");
+        }
+      });
     }
 
     async function setProducts() {
@@ -221,12 +312,17 @@ export default {
     }
     
     return {
+      warehouse,
       productsInWarehouse,
       addedProducts,
       updatedProducts,
       errors,
       checkedAll,
       loading,
+      selectCategoryForProduct,
+      removeCategoryFromProduct,
+      selectAttributesForProduct,
+      toggleModal,
       setProducts
     }
   },

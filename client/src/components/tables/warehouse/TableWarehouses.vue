@@ -14,6 +14,7 @@
         <th>Создан</th>
         <th>Обновлён</th>
         <th class="all">Название</th>
+        <th>Связь</th>
         <th style="width: 85px">Действие</th>
       </tr>
     </thead>
@@ -31,6 +32,7 @@
         <td>{{ moment(warehouse.createdAt).format("DD/MM/YYYY") }}</td>
         <td>{{ moment(warehouse.updatedAt).format("DD/MM/YYYY") }}</td>
         <td>{{ warehouse.title }}</td>
+        <td>{{ warehouse.connection }}</td>
         <td class="table-action table-action_fix-width">
           <a @click.prevent="showWarehouse(warehouse)" href="#" class="action-icon">
             <i class="mdi mdi-eye"></i
