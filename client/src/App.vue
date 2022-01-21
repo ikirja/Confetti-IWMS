@@ -1,5 +1,5 @@
 <template>
-  <div v-if="authecticated">
+  <div v-if="authenticated">
     <div class="wrapper">
       <LeftSidebar />
       <!-- <div id="nav">
@@ -17,7 +17,7 @@
     </div>
     <RightSidebar />
   </div>
-  <div v-if="!authecticated">
+  <div v-if="!authenticated">
     <div class="wrapper">
       <Auth />
     </div>
@@ -31,7 +31,7 @@ import Footer from "@/components/layout/Footer.vue";
 import RightSidebar from "@/components/layout/RightSidebar.vue";
 import Auth from "@/views/Auth.vue";
 
-import { computed } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { useStore } from 'vuex';
 
 export default {
@@ -44,9 +44,28 @@ export default {
   },
   setup() {
     const store = useStore();
-    const authecticated = computed(() => store.state.token && store.state.token.length > 0 ? true : false);
+    const authenticated = computed(() => store.state.token && store.state.token.length > 0 ? true : false);
+    const style = computed(() => store.state.style);
 
-    return { authecticated }
+    onMounted(() => !style.value ? changeStyle('light') : changeStyle(style.value));
+    watch(style, style => changeStyle(style));
+
+    function changeStyle(style) {
+      const styleLight = document.getElementById('light-style');
+      const styleDark = document.getElementById('dark-style');
+
+      if (style === 'light') {
+        styleLight.disabled = false;
+        styleDark.disabled = true;
+      }
+
+      if (style === 'dark') {
+        styleLight.disabled = true;
+        styleDark.disabled = false;
+      }
+    }
+
+    return { authenticated }
   }
 };
 </script>
