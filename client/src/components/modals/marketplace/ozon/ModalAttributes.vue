@@ -195,7 +195,7 @@ export default {
     }
 
     function saveSelectedAttributes() {
-      emit('selectAttributesForProduct', { productInWarehouse: props.product, attributes: attributes.value });
+      emit('selectAttributesForProduct', { product: props.product, attributes: attributes.value });
     }
 
     return {

@@ -54,7 +54,8 @@
         <th>Штрихкод</th>
         <th>Закупочная цена</th>
         <th>Цена</th>
-        <th>Количество</th>
+        <th>Кол-во на складе</th>
+        <th>Поступление</th>
         <th v-if="warehouse?.connection !== 'default'" style="width: 250px">Категория</th>
         <th v-if="warehouse?.connection !== 'default'">Характеристики</th>
       </tr>
@@ -126,6 +127,11 @@
               :id="'input' + index"
               :disabled="setIsDisabled"
             />
+          </div>
+        </td>
+        <td>
+          <div>
+            <strong>{{ productInWarehouse.inStock }}</strong>
           </div>
         </td>
         <td>
@@ -227,6 +233,8 @@ export default {
       if (jsonData.products) {
         jsonData.products.forEach(product => {
           product.checked = false;
+          product.inStock = product.quantity;
+          product.quantity = 0;
           if (warehouse.value.connection === 'ozon-seller-api') product.ozon.showModal = false;
         });
         productsInWarehouse.value = jsonData.products;
@@ -251,7 +259,7 @@ export default {
       });
     }
 
-    function selectAttributesForProduct({ productInWarehouse, attributes }) {
+    function selectAttributesForProduct({ product, attributes }) {
       let selectedAttributes = [];
 
       attributes.forEach(attribute => {
@@ -277,9 +285,9 @@ export default {
         }
       });
 
-      if (selectedAttributes.length > 0) productInWarehouse.ozon.attributes = selectedAttributes;
+      if (selectedAttributes.length > 0) product.ozon.attributes = selectedAttributes;
 
-      toggleModal(productInWarehouse.product._id);
+      toggleModal(product.product._id);
     }
 
     function toggleModal(productInWarehouseId) {

@@ -30,7 +30,7 @@
               </div>
               <div class="col-sm-7">
                 <div class="text-sm-end">
-                  <button type="button" class="btn btn-success mb-2 me-1">
+                  <!-- <button type="button" class="btn btn-success mb-2 me-1">
                     <i class="mdi mdi-cog-outline"></i>
                   </button>
                   <button type="button" class="btn btn-light mb-2 me-1">
@@ -38,7 +38,7 @@
                   </button>
                   <button type="button" class="btn btn-light mb-2">
                     Экспорт
-                  </button>
+                  </button> -->
                 </div>
               </div>
             </div>

@@ -55,13 +55,14 @@
         <th>Закупочная цена</th>
         <th>Цена</th>
         <th>Количество</th>
-        <th v-if="warehouse?.connection !== 'default'">Категория</th>
+        <th v-if="warehouse?.connection !== 'default'" style="width: 250px">Категория</th>
+        <th v-if="warehouse?.connection !== 'default'">Характеристики</th>
       </tr>
     </thead>
     <tbody>
       <tr
         v-for="(product, index) in products"
-        :key="product._id"
+        :key="product.product._id"
       >
         <td>
           <div class="form-check">
@@ -74,7 +75,7 @@
           <div>
             <input
               type="text"
-              :value="product.title"
+              :value="product.product.title"
               class="form-control"
               :id="'input' + index"
               disabled
@@ -85,7 +86,7 @@
           <div>
             <input
               type="text"
-              :value="product.sku"
+              :value="product.product.sku"
               class="form-control"
               :id="'input' + index"
               disabled
@@ -96,7 +97,7 @@
           <div>
             <input
               type="text"
-              :value="product.barcode"
+              :value="product.product.barcode"
               class="form-control"
               :id="'input' + index"
               disabled
@@ -107,7 +108,7 @@
           <div>
             <input
               type="number"
-              :value="product.purchasePrice"
+              :value="product.product.purchasePrice"
               class="form-control"
               :id="'input' + index"
               disabled
@@ -138,6 +139,25 @@
             />
           </div>
         </td>
+        <td v-if="warehouse?.connection !== 'default'">
+          <SelectCategory
+            v-if="!product.ozon.category"
+            :product-id="product._id"
+            @selected-category="selectCategoryForProduct"
+            @remove-category-from-product="removeCategoryFromProduct"
+          />
+          <small v-if="product.ozon.category" class="text-secondary fw-bold">Категория: <span class="text-info">{{ product.ozon.category.title }}</span></small>
+        </td>
+        <td v-if="warehouse?.connection !== 'default'">
+          <button class="btn btn-primary" @click="toggleModal(product.product._id)" :disabled="!product.ozon.category">Характеристики</button>
+          <ModalAttributes
+            :show="product.ozon.showModal"
+            :product="product"
+            @select-attributes-for-product="selectAttributesForProduct"
+            @toggle-modal="toggleModal"
+          />
+          <small v-if="product.ozon.attributes?.length > 0" class="text-success fw-bold">Характеристики указаны</small>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -167,12 +187,19 @@
 </template>
 
 <script>
+import SelectCategory from '@/components/forms/SelectCategory.vue';
+import ModalAttributes from '@/components/modals/marketplace/ozon/ModalAttributes.vue';
+
 import { ref, onMounted, watchEffect, computed } from "vue";
 import { useStore } from "vuex";
 import setProductsToWarehouse from '@/modules/warehouse/set-products-to-warehouse';
 
 export default {
   props: [ 'setIsDisabled' ],
+  components: {
+    SelectCategory,
+    ModalAttributes
+  },
   setup() {
     const store = useStore();
     const warehouse = computed(() => store.state.warehouses.currentWarehouse);
@@ -183,7 +210,7 @@ export default {
     let checkedAll = ref(false);
     let loading = ref(false);
 
-    onMounted(() => getProductsForWarehouse());
+    onMounted(async () => await getProductsForWarehouse());
 
     watchEffect(() => {
       if (checkedAll.value) products.value.forEach(product => product.checked = true);
@@ -198,19 +225,85 @@ export default {
         const productIdsInWarehouse = warehouse.value.products.map(productInWarehouse => productInWarehouse.product);
 
         responseProducts.forEach(product => {
-          product.product = product._id;
+          product.product = product;
           product.checked = false;
           product.price = null;
           product.quantity = null;
+          if (warehouse.value.connection === 'ozon-seller-api') product.ozon = { showModal: false };
         });
 
         products.value = responseProducts.filter(product => !productIdsInWarehouse.includes(product._id.toString()));
       }
     }
 
+    async function selectCategoryForProduct({ category, productId }) {
+      products.value.forEach(product => {
+        if (product.product._id.toString() === productId.toString()) {
+          product.ozon.categoryId = category.category_id;
+          product.ozon.category = category;
+        }
+      });
+    }
+
+    function removeCategoryFromProduct(productId) {
+      products.value.forEach(product => {
+        if (product.product._id.toString() === productId.toString()) {
+          product.ozon.categoryId = null;
+          product.ozon.category = null;
+        }
+      });
+    }
+
+    function selectAttributesForProduct({ product, attributes }) {
+      let selectedAttributes = [];
+
+      attributes.forEach(attribute => {
+        if (attribute.inputValue.length > 0) {
+          let selectedAttribute = {
+            complex_id: 0,
+            id: attribute.id,
+            values: []
+          }
+
+          if (attribute.is_collection && attribute.selectedValue) {
+            selectedAttribute.values.push({
+              dictionary_value_id: attribute.selectedValue.id,
+              value: attribute.selectedValue.value
+            });
+          } else {
+            selectedAttribute.values.push({
+              value: attribute.inputValue
+            });
+          }
+
+          selectedAttributes.push(selectedAttribute);
+        }
+      });
+
+      if (selectedAttributes.length > 0) product.ozon.attributes = selectedAttributes;
+
+      toggleModal(product.product._id);
+    }
+
+    function toggleModal(productId) {
+      products.value.forEach(product => {
+        if (product.product._id.toString() === productId.toString()) {
+          product.ozon.showModal = !product.ozon.showModal;
+          const body = document.querySelector("body");
+          product.ozon.showModal ? body.classList.add("modal-open") : body.classList.remove("modal-open");
+        }
+      });
+    }
+
     async function setProducts() {
       loading.value = true;
-      const response = await setProductsToWarehouse(warehouse.value, products.value, store.state.token);
+
+      const productsToSet = products.value.map(product => {
+        product.product = product.product._id;
+        return product;
+      });
+
+      const response = await setProductsToWarehouse(warehouse.value, productsToSet, store.state.token);
       
       if (response?.error?.length > 0) errors.value = response.error;
       if (response?.addedProducts?.length > 0) addedProducts.value = response.addedProducts;
@@ -229,6 +322,10 @@ export default {
       errors,
       checkedAll,
       loading,
+      selectCategoryForProduct,
+      removeCategoryFromProduct,
+      selectAttributesForProduct,
+      toggleModal,
       setProducts
     };
   },
