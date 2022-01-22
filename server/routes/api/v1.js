@@ -29,6 +29,7 @@ router.get('/product', authController.middleware.isAdmin, productController.getP
 // Товары обновляем по _id, а не SKU. По SKU ищем в БД из гугл таблицы перед добавлением
 router.post('/product', authController.middleware.isAdmin, productController.setProducts);
 router.post('/product/set-main-image', authController.middleware.isAdmin, productController.setProductMainImage);
+router.get('/product/:id', authController.middleware.isAdmin, productController.getProduct);
 
 // WAREHOUSE
 router.get('/warehouse', authController.middleware.isAdmin, warehouseController.getWarehouses);
