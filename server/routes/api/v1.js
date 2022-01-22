@@ -5,6 +5,7 @@ const router = Router();
 const {
   authController,
   customerController,
+  imageController,
   logController,
   orderController,
   productController,
@@ -66,6 +67,10 @@ router.get('/log/:id', authController.middleware.isAdmin, logController.getLog);
 // USERS
 router.get('/user', authController.middleware.isAdmin, userController.getUsers);
 router.get('/user/:id', authController.middleware.isAdmin, userController.getUser);
+
+// IMAGES
+router.post('/image', authController.middleware.isAdmin, imageController.uploadImage);
+router.post('/image/delete', authController.middleware.isAdmin, imageController.deleteImage);
 
 // MARKETPLACE
 // Ozon Seller Api

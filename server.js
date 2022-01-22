@@ -23,7 +23,7 @@ const User = require('./server/models/user');
 mongoose.connect('mongodb://localhost:27017/confetti');
 
 // Middlewares
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '3mb' }));
 app.use(passport.initialize());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.use(new jwtStrategy({
@@ -41,6 +41,7 @@ app.use('/api/v1', API_V1);
 
 // CLIENT
 app.use(express.static('client/dist'));
+app.use(express.static('server/public'));
 app.use("*", (req, res) => res.sendFile(__dirname + '/client/dist/index.html'));
 
 // Server
