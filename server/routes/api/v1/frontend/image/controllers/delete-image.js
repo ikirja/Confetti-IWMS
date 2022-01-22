@@ -19,7 +19,6 @@ module.exports = async (req, res) => {
 
     res.status(200).json(foundImage);
   } catch (err) {
-    console.log(err)
     logger.createLog({
       title: 'Ошибка',
       errorCode: 'I0001',
