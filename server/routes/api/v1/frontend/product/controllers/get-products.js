@@ -3,7 +3,7 @@ const logger = require('../../../../../../logger');
 
 module.exports = async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().populate('image').populate('images');
     res.status(200).json(products);
   } catch (err) {
     logger.createLog({
