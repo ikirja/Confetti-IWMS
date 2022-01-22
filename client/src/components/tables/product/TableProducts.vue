@@ -20,6 +20,7 @@
         <th>Штрихкод</th>
         <th>Описание</th>
         <th>Закупочная цена</th>
+        <th>Действие</th>
       </tr>
     </thead>
     <tbody>
@@ -38,7 +39,7 @@
         <td>
           <img
             v-if="product.image"
-            src="/assets/images/products/product-1.jpg"
+            :src="'/upload/' + product.image.file + '.jpg'"
             alt="contact-img"
             title="contact-img"
             class="rounded me-3"
@@ -64,16 +65,34 @@
         <td>{{ product.barcode }}</td>
         <td>{{ product.description.substring(0, 50) }}...</td>
         <td>{{ product.purchasePrice }} руб.</td>
+        <td>
+          <a href="#" class="action-icon">
+            <i class="mdi mdi-file-image"></i>
+          </a>
+          <a @click.prevent="toggleModal(product._id)" href="#" class="action-icon">
+            <i class="mdi mdi-file-upload"></i>
+          </a>
+          <ModalImageUpload
+            :show="product.showModal"
+            :product="product"
+            @toggle-modal="toggleModal"
+          />
+        </td>
       </tr>
     </tbody>
   </table>
 </template>
 
 <script>
+import ModalImageUpload from '@/components/modals/product/ModalImageUpload.vue';
+
 import { ref, onMounted, getCurrentInstance } from "vue";
 import { useStore } from "vuex";
 
 export default {
+  components: {
+    ModalImageUpload
+  },
   setup() {
     const store = useStore();
     const products = ref([]);
@@ -85,10 +104,29 @@ export default {
 
     async function getProducts() {
       const response = await fetch('/api/v1/product', { headers: { token: store.state.token }});
-      if (response.status === 200) products.value = await response.json();
+
+      if (response.status === 200) {
+        let json = await response.json();
+        json.forEach(product => product.showModal = false);
+        products.value = json;
+      }
     }
 
-    return { products, moment };
+    function toggleModal(productId) {
+      products.value.forEach(product => {
+        if (product._id.toString() === productId.toString()) {
+          product.showModal = !product.showModal;
+          const body = document.querySelector("body");
+          product.showModal ? body.classList.add("modal-open") : body.classList.remove("modal-open");
+        }
+      });
+    }
+
+    return {
+      products,
+      moment,
+      toggleModal
+    };
   }
 }
 </script>
