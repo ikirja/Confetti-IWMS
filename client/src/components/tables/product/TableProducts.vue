@@ -66,9 +66,9 @@
         <td>{{ product.description.substring(0, 50) }}...</td>
         <td>{{ product.purchasePrice }} руб.</td>
         <td>
-          <a href="#" class="action-icon">
-            <i class="mdi mdi-file-image"></i>
-          </a>
+          <a :href="'/ecommerce/product/' + product._id" class="action-icon">
+            <i class="mdi mdi-eye"></i
+          ></a>
           <a @click.prevent="toggleModal(product._id)" href="#" class="action-icon">
             <i class="mdi mdi-file-upload"></i>
           </a>
