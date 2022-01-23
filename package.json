@@ -4,7 +4,7 @@
   "description": "Confetti Inventory and Warehouses Management System application",
   "main": "server.js",
   "scripts": {
-    "server": "node server.js --production",
+    "server": "node --insecure-http-parser server.js",
     "build": "npm run build --prefix client/",
     "dev": "concurrently \"nodemon --insecure-http-parser server.js\" \"npm run serve --prefix client/\"",
     "devServer": "nodemon --insecure-http-parser server.js --delay=5"
