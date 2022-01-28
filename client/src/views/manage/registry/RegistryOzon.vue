@@ -126,6 +126,11 @@ export default {
       const url = '/api/v1/registry';
       let jsonData = await request(url, 'GET', store.state.token);
       jsonData = jsonData.filter(entry => entry.type === 'ozon');
+      jsonData.sort((a, b) => {
+        if (a.createdAt > b.createdAt) return -1;
+        if (a.createdAt < b.createdAt) return 1;
+        return 0;
+      });
       entries.value = jsonData.map(entry => {
         return { createdAt: entry.createdAt, updatedAt: entry.updatedAt, type: entry.type, title: entry.title, fields: entry.fields }
       });

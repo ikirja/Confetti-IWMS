@@ -53,10 +53,11 @@
         <th>Артикул</th>
         <th>Штрихкод</th>
         <th>Закупочная цена</th>
+        <th v-if="warehouse?.connection === 'ozon-seller-api'">РРЦ</th>
         <th>Цена</th>
         <th>Количество</th>
-        <th v-if="warehouse?.connection !== 'default'" style="width: 250px">Категория</th>
-        <th v-if="warehouse?.connection !== 'default'">Характеристики</th>
+        <th v-if="warehouse?.connection === 'ozon-seller-api'" style="width: 250px">Категория</th>
+        <th v-if="warehouse?.connection === 'ozon-seller-api'">Характеристики</th>
       </tr>
     </thead>
     <tbody>
@@ -115,6 +116,11 @@
             />
           </div>
         </td>
+        <td v-if="warehouse?.connection === 'ozon-seller-api'">
+          <div>
+            <strong>{{ product.ozon.rrp }}</strong>
+          </div>
+        </td>
         <td>
           <div>
             <input
@@ -139,7 +145,7 @@
             />
           </div>
         </td>
-        <td v-if="warehouse?.connection !== 'default'">
+        <td v-if="warehouse?.connection === 'ozon-seller-api'">
           <SelectCategory
             v-if="!product.ozon.category"
             :product-id="product._id"
@@ -148,7 +154,7 @@
           />
           <small v-if="product.ozon.category" class="text-secondary fw-bold">Категория: <span class="text-info">{{ product.ozon.category.title }}</span></small>
         </td>
-        <td v-if="warehouse?.connection !== 'default'">
+        <td v-if="warehouse?.connection === 'ozon-seller-api'">
           <button class="btn btn-primary" @click="toggleModal(product.product._id)" :disabled="!product.ozon.category">Характеристики</button>
           <ModalAttributes
             :show="product.ozon.showModal"
@@ -193,6 +199,7 @@ import ModalAttributes from '@/components/modals/marketplace/ozon/ModalAttribute
 import { ref, onMounted, watchEffect, computed } from "vue";
 import { useStore } from "vuex";
 import setProductsToWarehouse from '@/modules/warehouse/set-products-to-warehouse';
+import getOzonRRP from '@/modules/marketplace/ozon/get-ozon-rrp';
 
 export default {
   props: [ 'setIsDisabled' ],
@@ -229,7 +236,13 @@ export default {
           product.checked = false;
           product.price = null;
           product.quantity = null;
-          if (warehouse.value.connection === 'ozon-seller-api') product.ozon = { showModal: false };
+
+          if (warehouse.value.connection === 'ozon-seller-api') {
+            product.ozon = {
+              showModal: false,
+              rrp: getOzonRRP(product)
+            }
+          }
         });
 
         products.value = responseProducts.filter(product => !productIdsInWarehouse.includes(product._id.toString()));

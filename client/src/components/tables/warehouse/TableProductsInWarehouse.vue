@@ -1,9 +1,14 @@
 <template>
   <div class="row">
-    <div class="col-12">
+    <div class="col-6">
       <div class="page-title-box">
         <h4 class="page-title">Товары на складе</h4>
       </div>
+    </div>
+    <div class="col-6 d-flex justify-content-end align-items-center">
+      <button @click="updateProductsToMarketplace('prices')" class="btn btn-outline-warning me-3">Обновить цены</button>
+      <button @click="updateProductsToMarketplace('stocks')" class="btn btn-outline-warning me-3">Обновить остатки</button>
+      <button @click="addToMarketplace" class="btn btn-outline-success">Добавить на маркетплейс</button>
     </div>
   </div>
   <div
@@ -53,11 +58,14 @@
         <th>Артикул</th>
         <th>Штрихкод</th>
         <th>Закупочная цена</th>
+        <th v-if="warehouse?.connection === 'ozon-seller-api'">РРЦ</th>
         <th>Цена</th>
-        <th>Кол-во на складе</th>
         <th>Поступление</th>
-        <th v-if="warehouse?.connection !== 'default'" style="width: 250px">Категория</th>
-        <th v-if="warehouse?.connection !== 'default'">Характеристики</th>
+        <th>Кол-во на складе</th>
+        <th v-if="warehouse?.connection === 'ozon-seller-api'">Offer ID</th>
+        <th v-if="warehouse?.connection === 'ozon-seller-api'">Product ID</th>
+        <th v-if="warehouse?.connection === 'ozon-seller-api'" style="width: 250px">Категория</th>
+        <th v-if="warehouse?.connection === 'ozon-seller-api'">Характеристики</th>
       </tr>
     </thead>
     <tbody>
@@ -116,6 +124,11 @@
             />
           </div>
         </td>
+        <td v-if="warehouse?.connection === 'ozon-seller-api'">
+          <div>
+            <strong>{{ productInWarehouse.ozon.rrp }}</strong>
+          </div>
+        </td>
         <td>
           <div>
             <input
@@ -131,11 +144,6 @@
         </td>
         <td>
           <div>
-            <strong>{{ productInWarehouse.inStock }}</strong>
-          </div>
-        </td>
-        <td>
-          <div>
             <input
               type="number"
               min="0"
@@ -147,7 +155,20 @@
             />
           </div>
         </td>
-        <td v-if="warehouse?.connection !== 'default'">
+        <td>
+          <div>
+            <strong>{{ productInWarehouse.inStock }}</strong>
+          </div>
+        </td>
+        <td v-if="warehouse?.connection === 'ozon-seller-api'">
+          <div v-if="productInWarehouse.ozon.offerId">{{ productInWarehouse.ozon.offerId }}</div>
+          <div v-else>Товар не выгружен</div>
+        </td>
+        <td v-if="warehouse?.connection === 'ozon-seller-api'">
+          <div v-if="productInWarehouse.ozon.productId">{{ productInWarehouse.ozon.productId }}</div>
+          <div v-else>Товар не выгружен</div>
+        </td>
+        <td v-if="warehouse?.connection === 'ozon-seller-api'">
           <SelectCategory
             v-if="!productInWarehouse.ozon.category"
             :product-id="productInWarehouse.product._id"
@@ -156,7 +177,7 @@
           />
           <small v-if="productInWarehouse.ozon.category" class="text-secondary fw-bold">Категория: <span class="text-info">{{ productInWarehouse.ozon.category.title }}</span></small>
         </td>
-        <td v-if="warehouse?.connection !== 'default'">
+        <td v-if="warehouse?.connection === 'ozon-seller-api'">
           <button class="btn btn-primary" @click="toggleModal(productInWarehouse.product._id)" :disabled="!productInWarehouse.ozon.category">Характеристики</button>
           <ModalAttributes
             :show="productInWarehouse.ozon.showModal"
@@ -202,6 +223,10 @@ import { ref, onMounted, watchEffect, computed } from 'vue';
 import { useStore } from 'vuex';
 import request from '@/modules/request';
 import setProductsToWarehouse from '@/modules/warehouse/set-products-to-warehouse';
+import getOzonRRP from '@/modules/marketplace/ozon/get-ozon-rrp';
+import addToOzon from '@/modules/warehouse/add-to-ozon';
+import updateStocksOzon from '@/modules/warehouse/update-stocks-ozon';
+import updatePricesOzon from '@/modules/warehouse/update-prices-ozon';
 
 export default {
   props: [ 'setIsDisabled' ],
@@ -235,7 +260,11 @@ export default {
           product.checked = false;
           product.inStock = product.quantity;
           product.quantity = 0;
-          if (warehouse.value.connection === 'ozon-seller-api') product.ozon.showModal = false;
+
+          if (warehouse.value.connection === 'ozon-seller-api') {
+            product.ozon.showModal = false;
+            product.ozon.rrp = getOzonRRP(product.product);
+          }
         });
         productsInWarehouse.value = jsonData.products;
       }
@@ -300,6 +329,34 @@ export default {
       });
     }
 
+    async function addToMarketplace() {
+      const body = {
+        warehouseId: warehouse.value._id,
+        products: []
+      }
+
+      productsInWarehouse.value.forEach(productInWarehouse => productInWarehouse.checked ? body.products.push(productInWarehouse.product._id) : '');
+      if (body.products.length === 0) return alert('Не выбраны товары');
+
+      const jsonData = await addToOzon(body, store.state.token);
+      alert(JSON.stringify(jsonData));
+    }
+
+    async function updateProductsToMarketplace(type) {
+      const body = {
+        warehouseId: warehouse.value._id,
+        products: []
+      }
+
+      body.products = productsInWarehouse.value.filter(productInWarehouse => productInWarehouse.checked);
+      if (body.products.length === 0) return alert('Не выбраны товары');
+
+      let jsonData = null;
+      if (type === 'stocks') jsonData = await updateStocksOzon(body, store.state.token);
+      if (type === 'prices') jsonData = await updatePricesOzon(body, store.state.token);
+      alert(JSON.stringify(jsonData));
+    }
+
     async function setProducts() {
       loading.value = true;
 
@@ -331,6 +388,8 @@ export default {
       removeCategoryFromProduct,
       selectAttributesForProduct,
       toggleModal,
+      addToMarketplace,
+      updateProductsToMarketplace,
       setProducts
     }
   },
