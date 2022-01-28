@@ -1,4 +1,4 @@
-const Registry = require('../../models/registry');
+const Registry = require(__basedir + '/server/models/registry');
 
 module.exports = async (registry) => {
   try {

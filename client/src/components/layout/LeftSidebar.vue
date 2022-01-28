@@ -135,20 +135,43 @@
           </li>
         </router-link>
 
-        <li class="side-nav-title side-nav-item mt-3">Справочник</li>
+        <li class="side-nav-title side-nav-item mt-3">Справочники</li>
 
-        <router-link
-          to="/manage/registry"
-          v-slot="{ href, isActive }"
-          custom
-        >
-          <li class="side-nav-item" :class="{ 'menuitem-active': isActive }">
-            <a :href="href" class="side-nav-link">
-              <i class="uil-file-info-alt"></i>
-              <span> Регистр сведений </span>
-            </a>
-          </li>
-        </router-link>
+        <li class="side-nav-item">
+          <a
+            data-bs-toggle="collapse"
+            href="#sidebarRegistry"
+            aria-expanded="false"
+            aria-controls="sidebarRegistry"
+            class="side-nav-link"
+          >
+            <i class="uil-file-info-alt"></i>
+            <span> Регистр сведений </span>
+            <span class="menu-arrow"></span>
+          </a>
+          <div class="collapse" id="sidebarRegistry">
+            <ul class="side-nav-second-level">
+              <router-link
+                to="/manage/registry"
+                v-slot="{ href, isActive }"
+                custom
+              >
+                <li :class="{ 'menuitem-active': isActive }">
+                  <a :href="href">Все сведения</a>
+                </li>
+              </router-link>
+              <router-link
+                to="/manage/registry/ozon"
+                v-slot="{ href, isActive }"
+                custom
+              >
+                <li :class="{ 'menuitem-active': isActive }">
+                  <a :href="href">Ozon</a>
+                </li>
+              </router-link>
+            </ul>
+          </div>
+        </li>
 
         <li class="side-nav-title side-nav-item mt-3">Найстройки</li>
 
@@ -172,7 +195,7 @@
                 custom
               >
                 <li :class="{ 'menuitem-active': isActive }">
-                  <a :href="href">OZON</a>
+                  <a :href="href">Ozon</a>
                 </li>
               </router-link>
             </ul>

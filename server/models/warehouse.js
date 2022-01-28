@@ -58,7 +58,15 @@ const warehouseSchema = new Schema({
             type: Object,
             default: {}
           }
-        ]
+        ],
+        productId: {
+          type: Number,
+          default: 0
+        },
+        offerId: {
+          type: String,
+          default: ''
+        }
       }
     }
   ],

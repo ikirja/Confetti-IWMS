@@ -14,7 +14,7 @@ const {
   warehouseController,
   orderStatusController,
   marketplace
-} = require('./v1/frontend');
+} = require('./v1/index.js');
 
 //**************
 // API V1 ROUTES
@@ -81,5 +81,8 @@ router.post('/marketplace/ozon/get-category-attribute', authController.middlewar
 router.post('/marketplace/ozon/get-category-attribute-values', authController.middleware.isAdmin, marketplace.ozonSellerApi.getCategoryAttributeValues);
 router.get('/marketplace/ozon/get-config', authController.middleware.isAdmin, marketplace.ozonSellerApi.getConfig);
 router.post('/marketplace/ozon/set-config', authController.middleware.isAdmin, marketplace.ozonSellerApi.setConfig);
+router.post('/marketplace/ozon/product-import', authController.middleware.isAdmin, marketplace.ozonSellerApi.productImport);
+router.post('/marketplace/ozon/product-stocks', authController.middleware.isAdmin, marketplace.ozonSellerApi.productStocks);
+router.post('/marketplace/ozon/product-prices', authController.middleware.isAdmin, marketplace.ozonSellerApi.productPrices);
 
 module.exports = router;

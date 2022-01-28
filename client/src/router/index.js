@@ -40,7 +40,12 @@ const routes = [
   {
     path: '/manage/registry',
     name: 'Registry',
-    component: () => import('@/views/manage/Registry.vue')
+    component: () => import('@/views/manage/registry/Registry.vue')
+  },
+  {
+    path: '/manage/registry/ozon',
+    name: 'RegistryOzon',
+    component: () => import('@/views/manage/registry/RegistryOzon.vue')
   },
   {
     path: '/admin/marketplace/ozon',

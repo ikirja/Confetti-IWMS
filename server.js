@@ -28,7 +28,7 @@ app.use(passport.initialize());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.use(new jwtStrategy({
   jwtFromRequest: extractJwt.fromHeader('token'),
-  secretOrKey: require('./server/routes/api/v1/frontend/auth/controllers/jwt-secret')
+  secretOrKey: require('./server/routes/api/v1/auth/controllers/jwt-secret')
 }, (jwtPayload, cb) => {
   return User.findOne({ _id: jwtPayload._id })
           .then(user => cb(null, user))
@@ -43,6 +43,10 @@ app.use('/api/v1', API_V1);
 app.use(express.static('client/dist'));
 app.use(express.static('server/public'));
 app.use("*", (req, res) => res.sendFile(__dirname + '/client/dist/index.html'));
+
+// CRON
+const cron = require('./server/lib/cron');
+// cron.ozonSellerApi.product.importInfo.start();
 
 // Server
 app.listen(__config.PORT, __config.HOST, () => console.log('Confetti IWMS Application server has started'));
