@@ -234,7 +234,11 @@ export default {
       errors.value = [];
 
       const validated = validateProducts(products.value);
-      if (validated.errors.length > 0) return (errors.value = validated.errors);
+      if (validated.errors.length > 0) {
+        errors.value = validated.errors;
+        loading.value = false;
+        return;
+      }
 
       const response = await fetch('/api/v1/product', {
         method: 'POST',

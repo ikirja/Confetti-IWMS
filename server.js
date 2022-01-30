@@ -23,7 +23,7 @@ const User = require('./server/models/user');
 mongoose.connect('mongodb://localhost:27017/confetti');
 
 // Middlewares
-app.use(bodyParser.json({ limit: '3mb' }));
+app.use(bodyParser.json({ limit: '10mb' }));
 app.use(passport.initialize());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.use(new jwtStrategy({

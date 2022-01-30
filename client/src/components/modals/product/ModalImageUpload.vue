@@ -144,5 +144,6 @@ export default {
   margin: 10px;
   border: 1px solid rgb(210, 213, 217);;
   border-radius: 4px;
+  overflow: hidden;
 }
 </style>
