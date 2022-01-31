@@ -7,6 +7,7 @@ const moveFromToWarehouse = require('./controllers/move-from-to-warehouse');
 const getWarehouse = require('./controllers/get-warehouse');
 const setConnection = require('./controllers/set-connection');
 const getConnections = require('./controllers/get-connections');
+const setConnectionWarehouse = require('./controllers/set-connection-warehouse');
 
 const middleware = require('./middleware')
 
@@ -20,5 +21,6 @@ module.exports = {
   getWarehouse,
   setConnection,
   getConnections,
+  setConnectionWarehouse,
   middleware
 }

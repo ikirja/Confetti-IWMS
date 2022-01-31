@@ -7,6 +7,7 @@ const productImport = require('./controllers/product/import');
 const productImportInfo = require('./controllers/product/import-info');
 const productStocks = require('./controllers/product/stocks');
 const productPrices = require('./controllers/product/prices');
+const warehouseList = require('./controllers/warehouse/list');
 
 module.exports = {
   getCategoryTree,
@@ -17,5 +18,6 @@ module.exports = {
   productImport,
   productImportInfo,
   productStocks,
-  productPrices
+  productPrices,
+  warehouseList
 }

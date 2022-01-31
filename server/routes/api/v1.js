@@ -40,6 +40,7 @@ router.post('/warehouse/unset-default', authController.middleware.isAdmin, wareh
 router.post('/warehouse/move', authController.middleware.isAdmin, warehouseController.moveFromToWarehouse);
 router.get('/warehouse/connection', authController.middleware.isAdmin, warehouseController.getConnections);
 router.post('/warehouse/connection', authController.middleware.isAdmin, warehouseController.setConnection);
+router.post('/warehouse/connection-warehouse', authController.middleware.isAdmin, warehouseController.setConnectionWarehouse);
 router.get('/warehouse/:warehouseId', authController.middleware.isAdmin, warehouseController.getWarehouse);
 
 // ORDERS
@@ -84,5 +85,6 @@ router.post('/marketplace/ozon/set-config', authController.middleware.isAdmin, m
 router.post('/marketplace/ozon/product-import', authController.middleware.isAdmin, marketplace.ozonSellerApi.productImport);
 router.post('/marketplace/ozon/product-stocks', authController.middleware.isAdmin, marketplace.ozonSellerApi.productStocks);
 router.post('/marketplace/ozon/product-prices', authController.middleware.isAdmin, marketplace.ozonSellerApi.productPrices);
+router.post('/marketplace/ozon/warehouse-list', authController.middleware.isAdmin, marketplace.ozonSellerApi.warehouseList);
 
 module.exports = router;

@@ -23,6 +23,11 @@ const warehouseSchema = new Schema({
     required: true,
     default: 'default'
   },
+  connectionWarehouse: {
+    type: String,
+    required: true,
+    default: ''
+  },
   products: [
     {
       product: {

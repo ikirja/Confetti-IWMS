@@ -6,6 +6,7 @@ const setConfig = require('./controllers/config/set-config');
 const productImport = require('./controllers/product/import');
 const productStocks = require('./controllers/product/stocks');
 const productPrices = require('./controllers/product/prices');
+const warehouseList = require('./controllers/warehouse/list');
 
 module.exports = {
   getCategoryTree,
@@ -15,5 +16,6 @@ module.exports = {
   setConfig,
   productImport,
   productStocks,
-  productPrices
+  productPrices,
+  warehouseList
 }
