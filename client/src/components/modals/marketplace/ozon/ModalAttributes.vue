@@ -166,7 +166,7 @@ export default {
 
     function setInputValueForAttributes() {
       attributes.value.forEach((attribute) => {
-        const foundValueInProduct = props.product.ozon.attributes.find(productAttribute => productAttribute.id === attribute.id);
+        const foundValueInProduct = props.product.ozon?.attributes?.find(productAttribute => productAttribute.id === attribute.id);
 
         attribute.foundValues = [];
         attribute.selectedValue = null;
