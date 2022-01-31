@@ -5,7 +5,7 @@
         <h4 class="page-title">Товары на складе</h4>
       </div>
     </div>
-    <div class="col-6 d-flex justify-content-end align-items-center">
+    <div class="col-6 d-flex justify-content-end align-items-center" v-if="!setIsDisabled">
       <button @click="updateProductsToMarketplace('prices')" class="btn btn-outline-warning me-3">Обновить цены</button>
       <button @click="updateProductsToMarketplace('stocks')" class="btn btn-outline-warning me-3">Обновить остатки</button>
       <button @click="addToMarketplace" class="btn btn-outline-success">Добавить на маркетплейс</button>
@@ -190,7 +190,7 @@
       </tr>
     </tbody>
   </table>
-  <div class="row mb-2">
+  <div class="row mb-2" v-if="!setIsDisabled">
     <div class="col-6">
     
     </div>
