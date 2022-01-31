@@ -4,6 +4,7 @@ const getCategoryAttributeValues = require('./controllers/category/get-category-
 const getConfig = require('./controllers/config/get-config');
 const setConfig = require('./controllers/config/set-config');
 const productImport = require('./controllers/product/import');
+const productImportInfo = require('./controllers/product/import-info');
 const productStocks = require('./controllers/product/stocks');
 const productPrices = require('./controllers/product/prices');
 const warehouseList = require('./controllers/warehouse/list');
@@ -15,6 +16,7 @@ module.exports = {
   getConfig,
   setConfig,
   productImport,
+  productImportInfo,
   productStocks,
   productPrices,
   warehouseList

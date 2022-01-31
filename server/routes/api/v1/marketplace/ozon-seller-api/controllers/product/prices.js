@@ -23,22 +23,15 @@ module.exports = async (req, res) => {
       return {
         offer_id: product.ozon.offerId,
         product_id: product.ozon.productId,
-        price: product.price,
-        min_price: product.ozon.minPrice ? product.ozon.minPrice : product.price,
-        old_price: product.ozon.oldPrice ? product.ozon.oldPrice : 0,
-        premium_price: product.ozon.premiumPrice ? product.ozon.premiumPrice : 0
+        price: product.price.toString(),
+        min_price: product.ozon.minPrice ? product.ozon.minPrice.toString() : product.price.toString(),
+        old_price: product.ozon.oldPrice ? product.ozon.oldPrice.toString() : '0',
+        premium_price: product.ozon.premiumPrice ? product.ozon.premiumPrice.toString() : '0'
       }
     });
 
-    res.json(productPricesPayload);
+    const response = await productPrices(productPricesPayload);
 
-    // const response = await productImport(productsPayload);
-    const response = { result: [{
-      "product_id": 1386,
-      "offer_id": "PH8865",
-      "updated": true,
-      "errors": [ ]
-    }]};
     if (response.result) {
       const createdRegistry = await Registry.create({
         type: 'ozon',
@@ -47,11 +40,19 @@ module.exports = async (req, res) => {
           status: 'created',
           products: response.result
         }
-      })
+      });
     }
-    // res.status(200).json(response);
+
+    res.status(200).json(response.result);
   } catch (err) {
-    console.log(err)
+    logger.createLog({
+      title: 'Ошибка',
+      errorCode: 'P0002',
+      data: JSON.stringify(err) ? JSON.stringify(err) : '',
+      message: 'Error has occured while updating prices to OZON Seller API',
+      path: __filename
+    });
+
     res.status(400).json({ error: [ { message: 'Error has occured while updating prices to OZON Seller API' } ] });
   }
 }

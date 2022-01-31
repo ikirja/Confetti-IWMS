@@ -103,7 +103,7 @@ export default {
     watchEffect(async () => {
       if (props.show) {
         await getCategoryAttributes(props.product.ozon.category);
-        setEmptyInputValueForAttributes();
+        setInputValueForAttributes();
       }
     });
 
@@ -116,18 +116,27 @@ export default {
               (prevAttribute) => prevAttribute.id === attribute.id
             );
 
+            if (!prevAttribute.inputValue) {
+              setPrevAttributes();
+              return;
+            }
+            
             if (attribute.inputValue !== prevAttribute.inputValue) {
-              prevAttributes.value = JSON.parse(JSON.stringify(attributes));
+              if ((attribute.inputValue.length - prevAttribute.inputValue?.length) > 3) return;
+
+              setPrevAttributes();
 
               let values = await getCategoryAttributeValues(
                 props.product.ozon.category,
                 attribute
               );
+
               values = values.result.filter((item) =>
                 item.value
                   .toLowerCase()
                   .includes(attribute.inputValue.toLowerCase())
               );
+
               attribute.foundValues = values;
             }
           }
@@ -135,6 +144,10 @@ export default {
       },
       { deep: true }
     );
+
+    function setPrevAttributes() {
+      prevAttributes.value = JSON.parse(JSON.stringify(attributes.value));
+    }
 
     function toggleModal() {
       emit("toggleModal", props.product.product._id);
@@ -151,8 +164,10 @@ export default {
       );
     }
 
-    function setEmptyInputValueForAttributes() {
+    function setInputValueForAttributes() {
       attributes.value.forEach((attribute) => {
+        const foundValueInProduct = props.product.ozon.attributes.find(productAttribute => productAttribute.id === attribute.id);
+
         attribute.foundValues = [];
         attribute.selectedValue = null;
         if (
@@ -162,18 +177,20 @@ export default {
           attribute.type === "multiline"
         ) {
           attribute.inputType = "text";
-          attribute.inputValue = "";
+          attribute.inputValue = foundValueInProduct ? foundValueInProduct.values[0].value : '';
         }
 
         if (attribute.type === "Decimal" || attribute.type === "Integer") {
           attribute.inputType = "number";
-          attribute.inputValue = 0;
+          attribute.inputValue = foundValueInProduct ? foundValueInProduct.values[0].value : 0;
         }
 
         if (attribute.type === "Boolean") {
           attribute.inputType = "text";
-          attribute.inputValue = "";
+          attribute.inputValue = foundValueInProduct ? foundValueInProduct.values[0].value : '';
         }
+
+        // if (attribute.is_collection && foundValueInProduct) attribute.selectedValue = foundValueInProduct.values[0];
       });
     }
 

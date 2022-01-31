@@ -9,7 +9,14 @@ module.exports = async (req, res) => {
 
     res.status(200).json(ozonWarehouses.result);
   } catch (err) {
-    console.log(err)
+    logger.createLog({
+      title: 'Ошибка',
+      errorCode: 'MO0002',
+      data: JSON.stringify(err) ? JSON.stringify(err) : '',
+      message: 'Error has occured while getting warehouses from OZON Seller API',
+      path: __filename
+    });
+
     res.status(400).json({ error: [ { message: 'Error has occured while getting warehouses from OZON Seller API' } ] });
   }
 }

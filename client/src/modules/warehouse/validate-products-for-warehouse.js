@@ -13,12 +13,7 @@ export default function validateProductsForWarehouse(products) {
     }
 
     if (!product.price) {
-      validated.error.push({ code: 1, message: 'Цена товара', product });
-      validatedProduct = false;
-    }
-
-    if (!product.quantity) {
-      validated.error.push({ code: 2, message: 'Необходимо передавать количество товара', product });
+      validated.error.push({ code: 2, message: 'Цена товара', product });
       validatedProduct = false;
     }
 

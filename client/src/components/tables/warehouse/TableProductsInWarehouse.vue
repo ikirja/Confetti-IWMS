@@ -339,7 +339,9 @@ export default {
       if (body.products.length === 0) return alert('Не выбраны товары');
 
       const jsonData = await addToOzon(body, store.state.token);
-      alert(JSON.stringify(jsonData));
+      if (jsonData.error) return alert(JSON.stringify(jsonData));
+
+      alert('Успешно');
     }
 
     async function updateProductsToMarketplace(type) {
@@ -348,13 +350,18 @@ export default {
         products: []
       }
 
+      if (type === 'stocks') productsInWarehouse.value.forEach(productInWarehouse => productInWarehouse.quantity = productInWarehouse.inStock);
+
       body.products = productsInWarehouse.value.filter(productInWarehouse => productInWarehouse.checked);
       if (body.products.length === 0) return alert('Не выбраны товары');
 
       let jsonData = null;
       if (type === 'stocks') jsonData = await updateStocksOzon(body, store.state.token);
       if (type === 'prices') jsonData = await updatePricesOzon(body, store.state.token);
-      alert(JSON.stringify(jsonData));
+      if (jsonData.error) return alert(JSON.stringify(jsonData));
+
+      getWarehouseWithProducts();
+      alert('Успешно');
     }
 
     async function setProducts() {

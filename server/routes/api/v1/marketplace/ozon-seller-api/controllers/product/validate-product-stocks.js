@@ -7,7 +7,7 @@ module.exports = function validateProductStocks(products) {
   products.forEach(product => {
     let validatedProduct = true;
 
-    if (!product.quantity || typeof product.quantity !== 'number' || product.quantity < 0) {
+    if (typeof product.quantity !== 'number' || product.quantity < 0) {
       validated.errors.push({ code: 1, message: 'OZON Seller API: Product quantity', product });
       validatedProduct = false;
     }

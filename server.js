@@ -46,7 +46,7 @@ app.use("*", (req, res) => res.sendFile(__dirname + '/client/dist/index.html'));
 
 // CRON
 const cron = require('./server/lib/cron');
-// cron.ozonSellerApi.product.importInfo.start();
+cron.ozonSellerApi.product.importInfo.start();
 
 // Server
 app.listen(__config.PORT, __config.HOST, () => console.log('Confetti IWMS Application server has started'));

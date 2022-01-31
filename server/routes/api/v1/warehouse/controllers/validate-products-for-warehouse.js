@@ -39,11 +39,6 @@ module.exports = async (products) => {
       validatedProduct = false;
     }
 
-    if (!products[i].quantity) {
-      validated.errors.push({ code: 4, message: 'Необходимо передавать количество товара', product: products[i] });
-      validatedProduct = false;
-    }
-
     if (validatedProduct) validated.products.push(products[i]);
   }
   

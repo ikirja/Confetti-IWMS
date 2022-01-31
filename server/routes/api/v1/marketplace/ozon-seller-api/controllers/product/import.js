@@ -38,21 +38,19 @@ module.exports = async (req, res) => {
         name: productInWarehouse.product.title,
         offer_id: productInWarehouse.product.sku,
         pdf_list: [],
-        old_price: 0,
-        premium_price: 0,
+        old_price: '0',
+        premium_price: '0',
         price: productInWarehouse.price.toString(),
         primary_image: `${config.host}/upload/${productInWarehouse.product.image.file}-mp.jpg`,
-        vat: 0,
+        vat: '0',
         weight: productInWarehouse.product.weight,
         weight_unit: 'g',
         attributes: productInWarehouse.ozon.attributes
       }
     });
 
-    res.json(productsPayload);
+    const response = await productImport(productsPayload);
 
-    // const response = await productImport(productsPayload);
-    const response = { result: { task_id: 342324234 } };
     if (response.result?.task_id) {
       const createdRegistry = await Registry.create({
         type: 'ozon',
@@ -60,13 +58,22 @@ module.exports = async (req, res) => {
         fields: {
           taskId: response.result.task_id,
           status: 'created',
-          products: []
+          warehouse: foundWarehouse._id,
+          products: productsPayload.items
         }
-      })
+      });
     }
-    // res.status(200).json(response);
+
+    res.status(200).json(response.result);
   } catch (err) {
-    console.log(err)
-    res.status(400).json({ error: [ { message: 'Error has occured wile import products to OZON Seller API' } ] });
+    logger.createLog({
+      title: 'Ошибка',
+      errorCode: 'P0002',
+      data: JSON.stringify(err) ? JSON.stringify(err) : '',
+      message: 'Error has occured while import products to OZON Seller API',
+      path: __filename
+    });
+
+    res.status(400).json({ error: [ { message: 'Error has occured while import products to OZON Seller API' } ] });
   }
 }

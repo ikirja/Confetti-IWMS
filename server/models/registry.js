@@ -14,7 +14,7 @@ const registrySchema = new Schema({
     required: true
   },
   title: String,
-  fields: Object
+  fields: {}
 });
 
 module.exports = new model('Registry', registrySchema);

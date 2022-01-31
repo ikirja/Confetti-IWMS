@@ -4,8 +4,6 @@ const { productStocks } = require (__basedir + '/server/lib/marketplace/ozon-sel
 const validateProductStocks = require('./validate-product-stocks');
 
 module.exports = async (req, res) => {
-  const OZON_WAREHOUSE_ID = 1111;
-
   if (!req.body.warehouseId) return res.status(422).json({ error: [ { message: 'Warehouse ID is required' } ] });
   if (!req.body.products || !Array.isArray(req.body.products)) return res.status(422).json({ error: [ { message: 'Products are required' } ] });
 
@@ -26,20 +24,13 @@ module.exports = async (req, res) => {
         offer_id: product.ozon.offerId,
         product_id: product.ozon.productId,
         stock: product.quantity,
-        warehouse_id: OZON_WAREHOUSE_ID
+        warehouse_id: foundWarehouse.connectionWarehouse
       }
     });
 
-    res.json(productStocksPayload);
+    console.log(productStocksPayload)
+    const response = await productStocks(productStocksPayload);
 
-    // const response = await productImport(productsPayload);
-    const response = { result: [{
-      "warehouse_id": 22142605386000,
-      "product_id": 118597312,
-      "offer_id": "PH11042",
-      "updated": true,
-      "errors": [ ]
-    }]};
     if (response.result) {
       const createdRegistry = await Registry.create({
         type: 'ozon',
@@ -50,9 +41,17 @@ module.exports = async (req, res) => {
         }
       })
     }
-    // res.status(200).json(response);
+    
+    res.status(200).json(response.result);
   } catch (err) {
-    console.log(err)
+    logger.createLog({
+      title: 'Ошибка',
+      errorCode: 'P0002',
+      data: JSON.stringify(err) ? JSON.stringify(err) : '',
+      message: 'Error has occured while updating stocks to OZON Seller API',
+      path: __filename
+    });
+
     res.status(400).json({ error: [ { message: 'Error has occured while updating stocks to OZON Seller API' } ] });
   }
 }

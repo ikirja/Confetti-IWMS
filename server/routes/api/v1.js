@@ -83,6 +83,7 @@ router.post('/marketplace/ozon/get-category-attribute-values', authController.mi
 router.get('/marketplace/ozon/get-config', authController.middleware.isAdmin, marketplace.ozonSellerApi.getConfig);
 router.post('/marketplace/ozon/set-config', authController.middleware.isAdmin, marketplace.ozonSellerApi.setConfig);
 router.post('/marketplace/ozon/product-import', authController.middleware.isAdmin, marketplace.ozonSellerApi.productImport);
+router.post('/marketplace/ozon/product-import-info', authController.middleware.isAdmin, marketplace.ozonSellerApi.productImportInfo);
 router.post('/marketplace/ozon/product-stocks', authController.middleware.isAdmin, marketplace.ozonSellerApi.productStocks);
 router.post('/marketplace/ozon/product-prices', authController.middleware.isAdmin, marketplace.ozonSellerApi.productPrices);
 router.post('/marketplace/ozon/warehouse-list', authController.middleware.isAdmin, marketplace.ozonSellerApi.warehouseList);
