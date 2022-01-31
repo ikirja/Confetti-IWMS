@@ -21,6 +21,8 @@ module.exports = async (req, res) => {
 
     foundWarehouse.products = foundWarehouse.products.filter(productInWarehouse => productInWarehouse.product.image && req.body.products.includes(productInWarehouse.product._id.toString()));
 
+    if (foundWarehouse.products.length === 0) return res.status(422).json({ error: [ { message: 'No products to import' } ] });
+    
     productsPayload.items = foundWarehouse.products.map(productInWarehouse => {
       productInWarehouse.product.images = productInWarehouse.product.images.filter(image => image._id.toString() !== productInWarehouse.product.image._id.toString());
 
