@@ -28,7 +28,6 @@ module.exports = async (req, res) => {
       }
     });
 
-    console.log(productStocksPayload)
     const response = await productStocks(productStocksPayload);
 
     if (response.result) {
