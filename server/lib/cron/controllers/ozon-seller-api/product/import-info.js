@@ -21,8 +21,8 @@ async function getProductImportInfo() {
         if (item.offer_id && item.product_id) {
           const index = foundWarehouse.products.findIndex(productInWarehouse => productInWarehouse.product.sku === item.offer_id);
           if (index !== -1) {
-            foundWarehouse.products[i].ozon.offerId = item.offer_id;
-            foundWarehouse.products[i].ozon.productId = item.product_id;
+            foundWarehouse.products[index].ozon.offerId = item.offer_id;
+            foundWarehouse.products[index].ozon.productId = item.product_id;
           }
         }
       });
