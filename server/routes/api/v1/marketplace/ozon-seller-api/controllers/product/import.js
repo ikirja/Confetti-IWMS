@@ -26,6 +26,16 @@ module.exports = async (req, res) => {
     productsPayload.items = foundWarehouse.products.map(productInWarehouse => {
       productInWarehouse.product.images = productInWarehouse.product.images.filter(image => image._id.toString() !== productInWarehouse.product.image._id.toString());
 
+      if (productInWarehouse.product.description?.length > 0) {
+        productInWarehouse.ozon.attributes.push({
+          complex_id: 0,
+          id: 4191,
+          values: [{
+            value: productInWarehouse.product.description
+          }]
+        });
+      }
+
       return {
         barcode: productInWarehouse.product.barcode,
         category_id: productInWarehouse.ozon.categoryId,
