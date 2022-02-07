@@ -90,18 +90,15 @@ export default {
       },
       {
         id: 3,
-        title: 'Тип',
-
+        title: 'Тип'
       },
       {
         id: 4,
-        title: 'Название',
-
+        title: 'Название'
       },
       {
         id: 5,
-        title: 'Данные',
-
+        title: 'Данные'
       }
     ];
     const entries = ref([]);
@@ -126,13 +123,47 @@ export default {
       const url = '/api/v1/registry';
       let jsonData = await request(url, 'GET', store.state.token);
       jsonData = jsonData.filter(entry => entry.type === 'ozon');
+      
       jsonData.sort((a, b) => {
         if (a.createdAt > b.createdAt) return -1;
         if (a.createdAt < b.createdAt) return 1;
         return 0;
       });
+
       entries.value = jsonData.map(entry => {
-        return { createdAt: entry.createdAt, updatedAt: entry.updatedAt, type: entry.type, title: entry.title, fields: entry.fields }
+        let title = '';
+        entry.title === 'product-import' ? title = 'Импорт товаров' : '';
+        entry.title === 'product-prices' ? title = 'Обновление цен' : '';
+        entry.title === 'product-stocks' ? title = 'Обновление остатков' : '';
+
+        let data = '';
+
+        for (const prop in entry.fields) {
+          let info = '';
+          console.log(prop)
+          console.log(entry.fields[prop])
+          prop === 'taskId' ? info = `Task ID: ${entry.fields[prop]} ` : '';
+
+          if (prop === 'status') {
+            info = 'Статус: ';
+            entry.fields[prop] === 'created' ? info = info.concat('Создано ') :
+            entry.fields[prop] === 'done' ? info = info.concat('Выполнено ') : '';
+          }
+
+          if (prop === 'products' && entry.fields[prop].length > 0) {
+            info = 'Товары: ';
+            entry.fields[prop].forEach(product => product.offer_id ? info = info.concat(`Артикул: ${product.offer_id} | `) : '');
+          } 
+          data = data.concat(info)
+        }
+
+        return {
+          createdAt: entry.createdAt,
+          updatedAt: entry.updatedAt,
+          type: 'OZON',
+          title,
+          data
+        }
       });
     }
 

@@ -27,16 +27,21 @@
                 </a>
 
                 <div class="d-lg-flex d-none flex-wrap justify-content-center">
-                  <a v-for="image in product.images" :key="image" href="javascript: void(0);" @click.prevent="setProductMainImage(image)" class="position-relative">
+                  <a class="product-image position-relative mb-2 me-2" v-for="image in product.images" :key="image" href="javascript: void(0);">
                     <img
                       :src="'/upload/' + image.file + '.jpg'"
                       class="img-fluid img-thumbnail p-2"
                       style="max-width: 75px"
                       :alt="product.title"
+                      @click.prevent="setProductMainImage(image)"
                     />
                     <span v-if="product.image?._id.toString() === image._id.toString()" class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary">
                       Главное
                       <span class="visually-hidden">Главное изображение</span>
+                    </span>
+                    <span class="product-image-delete position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" @click.prevent="deleteProductImage(image)">
+                      <i class="mdi mdi-delete"></i>
+                      <span class="visually-hidden">Удалить изображение</span>
                     </span>
                   </a>
                 </div>
@@ -224,7 +229,7 @@ export default {
     }
 
     async function setProductMainImage(image) {
-      if (image._id.toString() === product.value.image._id.toString()) return;
+      if (image._id.toString() === product.value.image?._id.toString()) return;
 
       const json = await request('/api/v1/product/set-main-image', 'POST', store.state.token, {
         productId: product.value._id,
@@ -235,11 +240,35 @@ export default {
       await getProduct();
     }
 
+    async function deleteProductImage(image) {
+      await request('/api/v1/image/delete', 'POST', store.state.token, {
+        image: image.file,
+        type: image.type,
+        productId: product.value._id
+      });
+      
+      getProduct();
+    }
+
     return {
       product,
       moment,
-      setProductMainImage
+      setProductMainImage,
+      deleteProductImage
     }
   },
 };
 </script>
+
+<style scoped>
+.product-image-delete {
+  display: none;
+  font-size: .9em;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.product-image:hover > .product-image-delete {
+  display: block;
+}
+</style>
