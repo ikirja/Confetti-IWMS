@@ -4,7 +4,7 @@ const sharp = require('sharp');
 const logger = require(__basedir + '/server/lib/logger');
 
 module.exports = async (req, res) => {
-  const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+  const base64regex = /^([0-9a-zA-Z+/]{3})*(([0-9a-zA-Z+/]{3}==)|([0-9a-zA-Z+/]{3}=))?$/;
   if (!req.body.image || !base64regex.test(req.body.image)) return res.status(422).json({ error: [ { message: 'Не удалось разобрать переданные данные' } ] });
   if (!req.body.type || typeof req.body.type !== 'string') return res.status(422).json({ error: [ { message: 'Не указан тип изображения' } ] });
   if (req.body.type === 'product' && !req.body.productId) return res.status(422).json({ error: [ { message: 'Для типа изображения "Товар" обязателен параметр идентификатора товара' } ] });
