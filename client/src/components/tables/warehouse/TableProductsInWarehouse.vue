@@ -54,10 +54,7 @@
           </div>
         </th>
         <th>#</th>
-        <th class="all">Название</th>
-        <th>Артикул</th>
-        <th>Штрихкод</th>
-        <th>Закупочная цена</th>
+        <th class="all">Товар</th>
         <th v-if="warehouse?.connection === 'ozon-seller-api'">РРЦ</th>
         <th>Цена</th>
         <th>Поступление</th>
@@ -81,48 +78,10 @@
         </td>
         <td>{{ index + 1 }}</td>
         <td>
-          <div>
-            <input
-              type="text"
-              :value="productInWarehouse.product.title"
-              class="form-control"
-              :id="'input' + index"
-              disabled
-            />
-          </div>
-        </td>
-        <td>
-          <div>
-            <input
-              type="text"
-              :value="productInWarehouse.product.sku"
-              class="form-control"
-              :id="'input' + index"
-              disabled
-            />
-          </div>
-        </td>
-        <td>
-          <div>
-            <input
-              type="text"
-              :value="productInWarehouse.product.barcode"
-              class="form-control"
-              :id="'input' + index"
-              disabled
-            />
-          </div>
-        </td>
-        <td>
-          <div>
-            <input
-              type="number"
-              :value="productInWarehouse.product.purchasePrice"
-              class="form-control"
-              :id="'input' + index"
-              disabled
-            />
-          </div>
+          <div><strong>{{ productInWarehouse.product.title }}</strong></div>
+          <div>Артикул: {{ productInWarehouse.product.sku }}</div>
+          <div>Штрихкод: {{ productInWarehouse.product.barcode }}</div>
+          <div>ЗЦ: {{ productInWarehouse.product.purchasePrice }}</div>
         </td>
         <td v-if="warehouse?.connection === 'ozon-seller-api'">
           <div>
