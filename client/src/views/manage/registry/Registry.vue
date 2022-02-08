@@ -91,17 +91,14 @@ export default {
       {
         id: 3,
         title: 'Тип',
-
       },
       {
         id: 4,
         title: 'Название',
-
       },
       {
         id: 5,
         title: 'Данные',
-
       }
     ];
     const entries = ref([]);

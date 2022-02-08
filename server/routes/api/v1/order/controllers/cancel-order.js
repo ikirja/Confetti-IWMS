@@ -1,5 +1,6 @@
 const Order = require(__basedir + '/server/models/order');
 const logger = require(__basedir + '/server/lib/logger');
+const orderRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   try {
@@ -8,6 +9,8 @@ module.exports = async (req, res) => {
 
     foundOrder.isCanceled = !foundOrder.isCanceled;
     foundOrder.save();
+
+    await orderRegistries.order('cancel-order', foundOrder);
 
     res.status(200).json(foundOrder);
   } catch (err) {

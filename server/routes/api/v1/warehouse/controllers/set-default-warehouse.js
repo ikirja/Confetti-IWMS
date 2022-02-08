@@ -1,5 +1,6 @@
 const Warehouse = require(__basedir + '/server/models/warehouse');
 const logger = require(__basedir + '/server/lib/logger');
+const warehouseRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   try {
@@ -8,6 +9,7 @@ module.exports = async (req, res) => {
 
     foundWarehouse.defaultWarehouse = true;
     foundWarehouse.save();
+    await warehouseRegistries.warehouse('set-default-warehouse', foundWarehouse);
   } catch (err) {
     logger.createLog({
       title: 'Ошибка',

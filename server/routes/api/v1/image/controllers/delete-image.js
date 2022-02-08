@@ -2,6 +2,7 @@ const Image = require(__basedir + '/server/models/image');
 const Product = require(__basedir + '/server/models/product');
 const { unlinkSync } = require('fs');
 const logger = require(__basedir + '/server/lib/logger');
+const imageRegistries = require('./registries.js');
 
 module.exports = async (req, res) => {
   if (!req.body.image || typeof req.body.image !== 'string') return res.status(422).json({ error: [ { message: 'Не указано название файла изображения' } ] });
@@ -27,6 +28,7 @@ module.exports = async (req, res) => {
 
     foundImage.remove();
     foundProduct.save();
+    await imageRegistries.image('delete-image', foundImage);
 
     res.status(200).json(foundImage);
   } catch (err) {

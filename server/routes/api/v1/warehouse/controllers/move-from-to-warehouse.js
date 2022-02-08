@@ -1,6 +1,7 @@
 const Warehouse = require(__basedir + '/server/models/warehouse');
 const validateProductsForWarehouse = require('./validate-products-for-warehouse');
 const logger = require(__basedir + '/server/lib/logger');
+const warehouseRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   let addedProducts = [];
@@ -74,9 +75,15 @@ module.exports = async (req, res) => {
     return res.status(400).json({ errors: [ { message: 'Ошибка перемещения товаров между складами' } ] });
   }
 
+  await warehouseRegistries.warehouse('move-from-to-warehouse', {
+    addedProducts,
+    updatedProducts,
+    error: errors
+  });
+
   res.status(200).json({
     addedProducts,
     updatedProducts,
-    errors
+    error: errors
   });
 }

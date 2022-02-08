@@ -1,6 +1,7 @@
 const Warehouse = require(__basedir + '/server/models/warehouse');
 const { getConnections } = require('../../marketplace').connection;
 const logger = require(__basedir + '/server/lib/logger');
+const warehouseRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   if (!req.body.warehouseId || !req.body.connection) return res.status(422).json({ error: [ { message: 'Проверьте переданные данные' } ] });
@@ -14,6 +15,7 @@ module.exports = async (req, res) => {
 
     foundWarehouse.connection = req.body.connection;
     foundWarehouse.save();
+    await warehouseRegistries.warehouse('set-connection', foundWarehouse);
 
     res.status(200).json(foundWarehouse);
   } catch (err) {

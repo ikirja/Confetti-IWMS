@@ -8,7 +8,7 @@
             <label class="form-check-label" for="check-all">&nbsp;</label>
           </div>
         </th> -->
-        <th v-for="column in columns" :key="column.id">{{ column.title }}</th>
+        <th v-for="column in columns" :key="column.id" style="white-space: pre-line">{{ column.title }}</th>
         <th v-if="actions" style="width: 85px">Действие</th>
       </tr>
     </thead>

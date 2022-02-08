@@ -1,5 +1,6 @@
 const User = require(__basedir + '/server/models/user');
 const logger = require(__basedir + '/server/lib/logger');
+const userRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   if (!req.body.userId) return res.status(422).json({ error: [ { message: 'User ID is required' } ] });
@@ -10,6 +11,7 @@ module.exports = async (req, res) => {
 
     foundUser.isAdmin = !foundUser.isAdmin;
     foundUser.save();
+    await userRegistries.user('set-user-admin', foundUser);
 
     res.status(200).json(foundUser);
   } catch (err) {

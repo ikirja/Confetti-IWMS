@@ -2,6 +2,7 @@ const Warehouse = require(__basedir + '/server/models/warehouse');
 const validateProductsForWarehouse = require('./validate-products-for-warehouse');
 const validateProductsForWarehouseConnection = require('./validate-products-for-warehouse-connection');
 const logger = require(__basedir + '/server/lib/logger');
+const warehouseRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   let addedProducts = [];
@@ -47,6 +48,12 @@ module.exports = async (req, res) => {
 
     return res.status(400).json({ error: [ { message: 'Ошибка добавления и/или обновления товара на складе' } ] });
   }
+
+  await warehouseRegistries.warehouse('set-products-to-warehouse', {
+    addedProducts,
+    updatedProducts,
+    error: errors
+  });
 
   res.status(200).json({
     addedProducts,

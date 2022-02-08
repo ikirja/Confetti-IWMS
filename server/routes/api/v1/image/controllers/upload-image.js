@@ -29,6 +29,8 @@ module.exports = async (req, res) => {
       if (!foundProduct.image) foundProduct.image = createdImage;
       foundProduct.save()
     }
+
+    await imageRegistries.image('upload-image', createdImage);
         
     res.status(200).json(createdImage);
   } catch (err) {

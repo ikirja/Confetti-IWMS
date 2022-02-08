@@ -1,6 +1,7 @@
 const Warehouse = require(__basedir + '/server/models/warehouse');
 const validateWarehouse = require('./validate-warehouse');
 const logger = require(__basedir + '/server/lib/logger');
+const warehouseRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   const validated = validateWarehouse(req.body);
@@ -9,6 +10,8 @@ module.exports = async (req, res) => {
 
   try {
     const createdWarehouse = await Warehouse.create(validated.warehouse);
+    await warehouseRegistries.warehouse('create-warehouse', createdWarehouse);
+    
     res.status(200).json(createdWarehouse);
   } catch (err) {
     logger.createLog({

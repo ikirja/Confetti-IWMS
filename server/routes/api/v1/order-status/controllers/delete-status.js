@@ -1,6 +1,7 @@
 const OrderStatus = require(__basedir + '/server/models/order-status');
 const Order = require(__basedir + '/server/models/order');
 const logger = require(__basedir + '/server/lib/logger');
+const orderStatusRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   try {
@@ -13,6 +14,7 @@ module.exports = async (req, res) => {
     if (foundOrders && foundOrders.length > 0) return res.status(403).json({ error: [ { message: 'Нельзя удалить статус, есть заказы с данным статусом' } ] });
 
     foundStatus.remove();
+    await orderStatusRegistries.status('delete-status', foundStatus);
 
     res.status(200).json(foundStatus);
   } catch (err) {

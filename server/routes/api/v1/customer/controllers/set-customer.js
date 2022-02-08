@@ -1,6 +1,7 @@
 const Customer = require(__basedir + '/server/models/customer');
 const validateCustomer = require('./validate-customer');
 const logger = require(__basedir + '/server/lib/logger');
+const customerRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   const validated = validateCustomer(req.body);
@@ -14,12 +15,14 @@ module.exports = async (req, res) => {
     
     if (!foundCustomer) {
       createdCustomer = await Customer.create(validated.customer);
+      await customerRegistries.setCustomer(createdCustomer);
     } else {
       foundCustomer.title = validated.customer.title;
       foundCustomer.fields = validated.customer.fields;
       updatedCustomer = validated.customer;
 
       foundCustomer.save();
+      await customerRegistries.setCustomer(foundCustomer);
     }
   } catch (err) {
     logger.createLog({

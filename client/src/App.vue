@@ -15,7 +15,6 @@
         <Footer />
       </div>
     </div>
-    <RightSidebar />
   </div>
   <div v-if="!authenticated">
     <div class="wrapper">
@@ -28,10 +27,9 @@
 import LeftSidebar from "@/components/layout/LeftSidebar.vue";
 import Header from "@/components/layout/Header.vue";
 import Footer from "@/components/layout/Footer.vue";
-import RightSidebar from "@/components/layout/RightSidebar.vue";
 import Auth from "@/views/Auth.vue";
 
-import { computed, onMounted, watch } from 'vue';
+import { computed, } from 'vue';
 import { useStore } from 'vuex';
 
 export default {
@@ -39,31 +37,11 @@ export default {
     LeftSidebar,
     Header,
     Footer,
-    RightSidebar,
     Auth
   },
   setup() {
     const store = useStore();
     const authenticated = computed(() => store.state.token && store.state.token.length > 0 ? true : false);
-    const style = computed(() => store.state.style);
-
-    onMounted(() => !style.value ? changeStyle('light') : changeStyle(style.value));
-    watch(style, style => changeStyle(style));
-
-    function changeStyle(style) {
-      const styleLight = document.getElementById('light-style');
-      const styleDark = document.getElementById('dark-style');
-
-      if (style === 'light') {
-        styleLight.disabled = false;
-        styleDark.disabled = true;
-      }
-
-      if (style === 'dark') {
-        styleLight.disabled = true;
-        styleDark.disabled = false;
-      }
-    }
 
     return { authenticated }
   }

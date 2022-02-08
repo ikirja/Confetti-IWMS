@@ -2,17 +2,12 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    style: localStorage.getItem('style'),
     token: localStorage.getItem('token'),
     warehouses: {
       currentWarehouse: {}
     }
   },
   mutations: {
-    setStyle(state, style) {
-      localStorage.setItem('style', style);
-      state.style = style;
-    },
     setToken(state, token) {
       localStorage.setItem('token', token);
       state.token = token;
@@ -26,9 +21,6 @@ export default createStore({
     }
   },
   actions: {
-    changeStyle({ commit }, style) {
-      commit('setStyle', style);
-    },
     async login({ commit }, payload) {
       const response = await fetch('/api/v1/auth/login', {
         method: 'POST',

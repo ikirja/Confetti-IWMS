@@ -1,6 +1,7 @@
 const Product = require(__basedir + '/server/models/product');
 const validateProducts = require('./validate-products.js');
 const logger = require(__basedir + '/server/lib/logger');
+const productRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   const validated = validateProducts(req.body);
@@ -64,6 +65,12 @@ module.exports = async (req, res) => {
 
     return res.status(400).json({ error: [ { message: 'Ошибка при создании товаров' } ] });
   }
+
+  await productRegistries.product('set-products', {
+    createdProducts,
+    updatedProducts,
+    error: errors
+  });
 
   res.status(200).json({
     createdProducts,

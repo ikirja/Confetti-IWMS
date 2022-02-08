@@ -1,6 +1,7 @@
 const Product = require(__basedir + '/server/models/product');
 const Image = require(__basedir + '/server/models/image');
 const logger = require(__basedir + '/server/lib/logger');
+const productRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   if (!req.body.productId || typeof req.body.productId !== 'string') return res.status(422).json({ error: [ { message: 'Не передан идентификатор товара' } ] });
@@ -16,6 +17,7 @@ module.exports = async (req, res) => {
 
     foundProduct.image = foundImage;
     await foundProduct.save();
+    await productRegistries.product('set-product-main-image', foundProduct);
 
     res.status(200).json(foundProduct);
   } catch (err) {

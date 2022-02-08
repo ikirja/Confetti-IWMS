@@ -2,6 +2,7 @@ const Order = require(__basedir + '/server/models/order');
 const Warehouse = require(__basedir + '/server/models/warehouse');
 const validateProductsForWarehouse = require('../../warehouse/controllers/validate-products-for-warehouse');
 const logger = require(__basedir + '/server/lib/logger');
+const orderRegistries = require('./registries');
 
 module.exports = async (req, res) => {
   try {
@@ -51,6 +52,8 @@ module.exports = async (req, res) => {
 
     foundWarehouse.save();
     foundOrder.save();
+    await orderRegistries.order('change-products', foundOrder);
+
     res.status(200).json(foundOrder);
   } catch (err) {
     logger.createLog({
