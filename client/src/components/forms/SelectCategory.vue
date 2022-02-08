@@ -11,6 +11,7 @@
 import { onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import sortOzonCategoryAsc from '@/modules/marketplace/ozon/sort-category-title-asc';
+import request from '@/modules/request';
 
 export default {
   props: [ 'productId' ],
@@ -28,12 +29,11 @@ export default {
     onMounted(async () => await getCategoryTree());
 
     async function getCategoryTree() {
-      const response = await fetch('/api/v1/marketplace/ozon/get-category-tree', { headers: { token: store.state.token } });
-      const jsonData = await response.json();
+      const json = await request('/api/v1/marketplace/ozon/get-category-tree', 'GET', store.state.token);
 
-      if (jsonData.result) {
-        jsonData.result.sort(sortOzonCategoryAsc);
-        depthLevels.value[0].categories = jsonData.result;
+      if (json.result) {
+        json.result.sort(sortOzonCategoryAsc);
+        depthLevels.value[0].categories = json.result;
       }
     }
 

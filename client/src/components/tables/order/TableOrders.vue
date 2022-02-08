@@ -50,6 +50,7 @@
 <script>
 import { ref, onMounted, getCurrentInstance } from "vue";
 import { useStore } from "vuex";
+import request from '@/modules/request';
 
 export default {
   setup() {
@@ -62,8 +63,8 @@ export default {
     onMounted(() => getOrders());
 
     async function getOrders() {
-      const response = await fetch('/api/v1/order', { headers: { token: store.state.token } });
-      if (response.status === 200) orders.value = await response.json();
+      const json = await request('/api/v1/order', 'GET', store.state.token);
+      orders.value = json;
     }
 
     return {

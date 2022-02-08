@@ -1,6 +1,6 @@
-export default async function getConnections(token) {
-  const response = await fetch('/api/v1/warehouse/connection', { headers: { token } });
-  if (response.status !== 200) return [];
+import request from '@/modules/request';
 
-  return response.json();
+export default async function getConnections(token) {
+  const json = await request('/api/v1/warehouse/connection', 'GET', token);
+  return json;
 }

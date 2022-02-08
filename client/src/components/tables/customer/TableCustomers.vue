@@ -52,6 +52,7 @@
 <script>
 import { ref, onMounted, getCurrentInstance } from "vue";
 import { useStore } from "vuex";
+import request from '@/modules/request';
 
 export default {
   setup(props, { emit }) {
@@ -64,8 +65,8 @@ export default {
     onMounted(() => getCustomers());
 
     async function getCustomers() {
-      const response = await fetch('/api/v1/customer', { headers: { token: store.state.token } });
-      if (response.status === 200) customers.value = await response.json();
+      const json = await request('/api/v1/customer', 'GET', store.state.token);
+      customers.value = json;
     }
 
     function showCustomer(customer) {

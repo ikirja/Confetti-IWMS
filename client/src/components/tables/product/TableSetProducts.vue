@@ -199,6 +199,7 @@
 import { ref } from "vue";
 import { useStore } from "vuex";
 import validateProducts from "@/modules/product/validate-products";
+import request from '@/modules/request';
 
 export default {
   setup() {
@@ -240,27 +241,19 @@ export default {
         return;
       }
 
-      const response = await fetch('/api/v1/product', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'token': store.state.token
-        },
-        body: JSON.stringify(validated.products)
-      });
+      const json = await request('/api/v1/product', 'POST', store.state.token, validated.products);
 
-      const jsonData = await response.json();
-
-      if (jsonData.error.length === 0) products.value = [];
-      if (jsonData.error.length > 0) {
-        errors.value = jsonData.error;
+      if (json.error.length === 0) products.value = [];
+      
+      if (json.error.length > 0) {
+        errors.value = json.error;
         
         let productSkus = [];
         errors.value.forEach(error => productSkus.push(error.product.sku));
         products.value = products.value.filter(product => productSkus.includes(product.sku));
       }
-      if (jsonData.createdProducts.length > 0) createdProducts.value = jsonData.createdProducts;
-      if (jsonData.updatedProducts.length > 0) updatedProducts.value = jsonData.updatedProducts;
+      if (json.createdProducts.length > 0) createdProducts.value = json.createdProducts;
+      if (json.updatedProducts.length > 0) updatedProducts.value = json.updatedProducts;
 
       loading.value = false;
     }

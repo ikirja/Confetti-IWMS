@@ -1,13 +1,6 @@
-export default async function setConnectionWarehouse({ warehouseId, connectionWarehouseId, token }) {
-  const response = await fetch('/api/v1/warehouse/connection-warehouse', {
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      token
-    },
-    body: JSON.stringify({ warehouseId, connectionWarehouseId })
-  });
+import request from '@/modules/request';
 
-  const jsonData = await response.json();
-  return jsonData;
+export default async function setConnectionWarehouse({ warehouseId, connectionWarehouseId, token }) {
+  const json = await request('/api/v1/warehouse/connection-warehouse', 'POST', token, { warehouseId, connectionWarehouseId });
+  return json;
 }

@@ -3,11 +3,11 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-6">
-          <!-- {{ fullYear }} © Confetti: Inventory & Warehouse Management System -->
+          confetti.app.version.1.0.0_beta_3
         </div>
         <div class="col-md-6">
           <div class="text-md-end footer-links d-none d-md-block">
-            {{ fullYear }} © Confetti: Inventory & Warehouse Management System
+            {{ fullYear }} &copy; Confetti: Inventory & Warehouse Management System
             <!-- <a href="javascript: void(0);">About</a>
             <a href="javascript: void(0);">Support</a>
             <a href="javascript: void(0);">Contact Us</a> -->

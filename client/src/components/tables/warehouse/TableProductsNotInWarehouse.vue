@@ -157,6 +157,7 @@ import ModalAttributes from '@/components/modals/marketplace/ozon/ModalAttribute
 
 import { ref, onMounted, watchEffect, computed } from "vue";
 import { useStore } from "vuex";
+import request from '@/modules/request';
 import setProductsToWarehouse from '@/modules/warehouse/set-products-to-warehouse';
 import getOzonRRP from '@/modules/marketplace/ozon/get-ozon-rrp';
 
@@ -184,28 +185,26 @@ export default {
     });
 
     async function getProductsForWarehouse() {
-      const response = await fetch('/api/v1/product', { headers: { token: store.state.token } });
-      
-      if (response.status === 200) {
-        const responseProducts = await response.json();
-        const productIdsInWarehouse = warehouse.value.products.map(productInWarehouse => productInWarehouse.product);
+      const json = await request('/api/v1/product', 'GET', store.state.token);
 
-        responseProducts.forEach(product => {
-          product.product = product;
-          product.checked = false;
-          product.price = null;
-          product.quantity = null;
+      const responseProducts = json;
+      const productIdsInWarehouse = warehouse.value.products.map(productInWarehouse => productInWarehouse.product);
 
-          if (warehouse.value.connection === 'ozon-seller-api') {
-            product.ozon = {
-              showModal: false,
-              rrp: getOzonRRP(product)
-            }
+      responseProducts.forEach(product => {
+        product.product = product;
+        product.checked = false;
+        product.price = null;
+        product.quantity = null;
+
+        if (warehouse.value.connection === 'ozon-seller-api') {
+          product.ozon = {
+            showModal: false,
+            rrp: getOzonRRP(product)
           }
-        });
+        }
+      });
 
-        products.value = responseProducts.filter(product => !productIdsInWarehouse.includes(product._id.toString()));
-      }
+      products.value = responseProducts.filter(product => !productIdsInWarehouse.includes(product._id.toString()));
     }
 
     async function selectCategoryForProduct({ category, productId }) {

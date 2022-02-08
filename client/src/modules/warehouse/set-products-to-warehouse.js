@@ -1,5 +1,6 @@
 import getCheckedProducts from './get-checked-products';
 import validateProductsForWarehouse from './validate-products-for-warehouse';
+import request from '@/modules/request';
 
 export default async function setProductsToWarehouse(warehouse, products, token) {
   const response = {
@@ -21,20 +22,11 @@ export default async function setProductsToWarehouse(warehouse, products, token)
 
   const body = { warehouseId: warehouse._id, products: validated.products };
 
-  const responseFromServer = await fetch('/api/v1/warehouse/product', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'token': token
-    },
-    body: JSON.stringify(body)
-  });
+  const json = await request('/api/v1/warehouse/product', 'POST', token, body);
 
-  const jsonData = await responseFromServer.json();
-
-  if (jsonData.error?.length > 0) response.error = jsonData.error;
-  if (jsonData.addedProducts?.length > 0) response.addedProducts = jsonData.addedProducts;
-  if (jsonData.updatedProducts?.length > 0) response.updatedProducts = jsonData.updatedProducts;
+  if (json.error?.length > 0) response.error = json.error;
+  if (json.addedProducts?.length > 0) response.addedProducts = json.addedProducts;
+  if (json.updatedProducts?.length > 0) response.updatedProducts = json.updatedProducts;
 
   return response;
 }

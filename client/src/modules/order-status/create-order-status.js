@@ -1,4 +1,5 @@
 import validateOrderStatus from "./validate-order-status";
+import request from '@/modules/request';
 
 export default async function createOrderStatus(orderStatus, token) {
   const response = {
@@ -12,22 +13,13 @@ export default async function createOrderStatus(orderStatus, token) {
     return response;
   }
 
-  const responseFromServer = await fetch('/api/v1/order-status/create', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'token': token
-    },
-    body: JSON.stringify(validated.orderStatus)
-  });
+  const json = await request('/api/v1/order-status/create', 'POST', token, validated.orderStatus);
 
-  const jsonData = await responseFromServer.json();
-
-  if (jsonData.error) {
-    response.errors = jsonData.error;
+  if (json.error) {
+    response.errors = json.error;
     return response;
   }
   
-  response.createdStatus = jsonData;
+  response.createdStatus = json;
   return response;
 }

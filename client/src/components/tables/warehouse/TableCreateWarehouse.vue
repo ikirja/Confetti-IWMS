@@ -64,6 +64,7 @@
 import { ref } from "vue";
 import { useStore } from "vuex";
 import validateWarehouse from "@/modules/warehouse/validate-warehouse";
+import request from '@/modules/request';
 
 export default {
   setup() {
@@ -80,24 +81,15 @@ export default {
       const validated = validateWarehouse(warehouse.value);
       if (validated.errors.length > 0) return (errors.value = validated.errors);
 
-      const response = await fetch('/api/v1/warehouse', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'token': store.state.token
-        },
-        body: JSON.stringify(validated.warehouse)
-      });
+      const json = await request('/api/v1/warehouse', 'POST', store.state.token, validated.warehouse);
 
-      const jsonData = await response.json();
-
-      if (jsonData.error) {
-        errors.value = jsonData.error;
+      if (json.error) {
+        errors.value = json.error;
         return;
       }
       
       warehouse.value = { title: null };
-      createdWarehouse.value = jsonData;
+      createdWarehouse.value = json;
       loading.value = false;
     }
 

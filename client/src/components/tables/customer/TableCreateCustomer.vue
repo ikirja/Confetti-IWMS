@@ -142,6 +142,7 @@
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import validateCustomer from "@/modules/customer/validate-customer";
+import request from '@/modules/request';
 
 export default {
   setup() {
@@ -173,19 +174,10 @@ export default {
       const validated = validateCustomer(customer.value);
       if (validated.errors.length > 0) return (errors.value = validated.errors);
 
-      const response = await fetch('/api/v1/customer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'token': store.state.token
-        },
-        body: JSON.stringify(validated.customer)
-      });
+      const json = await request('/api/v1/customer', 'POST', store.state.token, validated.customer);
 
-      const jsonData = await response.json();
-
-      if (jsonData.error) {
-        errors.value = jsonData.error;
+      if (json.error) {
+        errors.value = json.error;
         return;
       }
       
@@ -197,8 +189,8 @@ export default {
         fields: []
       };
 
-      if (jsonData.createdCustomer?.title) createdCustomer.value = jsonData.createdCustomer;
-      if (jsonData.updatedCustomer?.title) updatedCustomer.value = jsonData.updatedCustomer;
+      if (json.createdCustomer?.title) createdCustomer.value = json.createdCustomer;
+      if (json.updatedCustomer?.title) updatedCustomer.value = json.updatedCustomer;
 
       loading.value = false;
     }

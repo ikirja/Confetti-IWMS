@@ -1,13 +1,6 @@
-export default async function updateStocksOzon(productStocksPayload, token) {
-  const response = await fetch('/api/v1/marketplace/ozon/product-stocks', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'token': token
-    },
-    body: JSON.stringify(productStocksPayload)
-  });
+import request from '@/modules/request';
 
-  const jsonData = await response.json();
-  return jsonData;
+export default async function updateStocksOzon(productStocksPayload, token) {
+  const json = await request('/api/v1/marketplace/ozon/product-stocks', 'POST', token, productStocksPayload);
+  return json;
 }

@@ -88,6 +88,7 @@ import ModalImageUpload from '@/components/modals/product/ModalImageUpload.vue';
 
 import { ref, onMounted, getCurrentInstance } from "vue";
 import { useStore } from "vuex";
+import request from '@/modules/request';
 
 export default {
   components: {
@@ -103,13 +104,9 @@ export default {
     onMounted(() => getProducts());
 
     async function getProducts() {
-      const response = await fetch('/api/v1/product', { headers: { token: store.state.token }});
-
-      if (response.status === 200) {
-        let json = await response.json();
-        json.forEach(product => product.showModal = false);
-        products.value = json;
-      }
+      const json = await request('/api/v1/product', 'GET', store.state.token);
+      json.forEach(product => product.showModal = false);
+      products.value = json;
     }
 
     function toggleModal(productId) {

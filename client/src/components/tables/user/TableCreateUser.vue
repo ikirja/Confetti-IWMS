@@ -115,11 +115,11 @@ export default {
       loading.value = true;
       errors.value = [];
 
-      const jsonData = await request('/api/v1/auth/register', 'POST', store.state.token, user.value);
+      const json = await request('/api/v1/auth/register', 'POST', store.state.token, user.value);
 
-      if (jsonData.error) {
+      if (json.error) {
         userCreated.value = false;
-        errors.value = jsonData.error;
+        errors.value = json.error;
         return;
       }
       
