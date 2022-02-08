@@ -41,6 +41,10 @@
                 <label for="ozon-seller-api-key" class="form-label">API-KEY</label>
                 <input v-model="settings.apiKey" type="text" id="ozon-seller-api-key" class="form-control" :disabled="loading">
               </div>
+              <div class="mb-3">
+                <label for="ozon-seller-api-key" class="form-label">HOST</label>
+                <input v-model="settings.host" type="text" id="ozon-seller-api-host" class="form-control" :disabled="loading">
+              </div>
             </div>
           </div>
         </div>
@@ -65,7 +69,8 @@ export default {
     const settings = ref({
       url: '',
       clientId: '',
-      apiKey: ''
+      apiKey: '',
+      host: ''
     });
     let loading = ref(false);
 
@@ -73,13 +78,10 @@ export default {
 
     async function getOzonSellerApiConfig() {
       loading.value = true;
-      const json = await request('/api/v1/marketplace/ozon/get-config', 'GET', store.state.token);
 
-      if (!json.error) {
-        settings.value.url = json.url;
-        settings.value.clientId = json.clientId;
-        settings.value.apiKey = json.apiKey;
-      }
+      const json = await request('/api/v1/marketplace/ozon/get-config', 'GET', store.state.token);
+      setCurrentSettings(json);
+
       loading.value = false;
     }
 
@@ -87,16 +89,19 @@ export default {
       loading.value = true;
 
       const json = await request('/api/v1/marketplace/ozon/set-config', 'POST', store.state.token, settings.value);
-
-      if (!json.error) {
-        settings.value.url = json.url;
-        settings.value.clientId = json.clientId;
-        settings.value.apiKey = json.apiKey;
-      } else {
-        alert('Произошла ошибка');
-      }
+      setCurrentSettings(json);
+      alert('Настройки успешно сохранены');
 
       loading.value = false;
+    }
+
+    function setCurrentSettings(jsonData) {
+      if (jsonData.error) return alert('Произошла ошибка');
+
+      settings.value.url = jsonData.url;
+      settings.value.clientId = jsonData.clientId;
+      settings.value.apiKey = jsonData.apiKey;
+      settings.value.host = jsonData.host;
     }
 
     return {
