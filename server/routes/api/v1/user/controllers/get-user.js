@@ -5,7 +5,7 @@ module.exports = async (req, res) => {
   const { userId } = req.params.id;
 
   try {
-    const foundUser = await User.findOne({ _id: logId });
+    const foundUser = await User.findOne({ _id: userId });
     if (!foundUser) return res.status(404).json({ errors: [ { message: 'Пользователь не найден' } ] });
     res.status(200).json(foundUser);
   } catch (err) {

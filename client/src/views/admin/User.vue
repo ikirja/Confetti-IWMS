@@ -40,6 +40,7 @@
               <Table 
                 :columns="columns"
                 :entries="entries"
+                :actions="actions"
               />
             </div>
           </div>
@@ -82,7 +83,7 @@ export default {
   setup() {
     const store = useStore();
     const columns = [
-      { id: 1,title: 'ID' },
+      { id: 1, title: 'ID' },
       { id: 2, title: 'Логин' },
       { id: 3, title: 'Имя' },
       { id: 4, title: 'Фамилия' },
@@ -94,6 +95,15 @@ export default {
       tableUsers: true,
       tableCreateUser: false
     });
+    const actions = {
+      setUserAdmin: {
+        method: setUserAdmin,
+        classes: {
+          'mdi': true,
+          'mdi-account-convert': true
+        }
+      }
+    }
 
     onMounted(() => getUsers());
 
@@ -113,9 +123,22 @@ export default {
       entries.value = jsonData;
     }
 
+    async function setUserAdmin(user) {
+      const json = await request(
+        '/api/v1/user',
+        'POST',
+        store.state.token,
+        { userId: user._id }
+      )
+      if (json.error) return alert('Произошла ошибка');
+
+      getUsers();
+    }
+
     return {
       columns,
       entries,
+      actions,
       show,
       changeShow
     }

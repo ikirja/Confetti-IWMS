@@ -9,7 +9,7 @@
           </div>
         </th> -->
         <th v-for="column in columns" :key="column.id">{{ column.title }}</th>
-        <!-- <th style="width: 85px">Действие</th> -->
+        <th v-if="actions" style="width: 85px">Действие</th>
       </tr>
     </thead>
     <tbody>
@@ -30,14 +30,11 @@
           </div>
           <div v-else>{{ value }}</div>
         </td>
-        <!-- <td class="table-action table-action_fix-width">
-          <a @click.prevent="actionOne" href="#" class="action-icon">
-            <i class="mdi mdi-eye"></i
+        <td v-if="actions" class="table-action table-action_fix-width">
+          <a v-for="action in actions" :key="action" @click.prevent="action.method(entry)" href="#" class="action-icon">
+            <i :class="action.classes"></i
           ></a>
-          <a @click.prevent="actionTwo" href="#" class="action-icon">
-            <i class="mdi mdi-database-plus"></i
-          ></a>
-        </td> -->
+        </td>
       </tr>
     </tbody>
   </table>
@@ -47,7 +44,7 @@
 import { getCurrentInstance } from "vue";
 
 export default {
-  props: ["columns", "entries"],
+  props: ["columns", "entries", "actions"],
   setup() {
     const internalInstance = getCurrentInstance();
     const moment = internalInstance.appContext.config.globalProperties.$moment;

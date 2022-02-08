@@ -71,6 +71,7 @@ router.get('/log/:id', authController.middleware.isAdmin, logController.getLog);
 // USERS
 router.get('/user', authController.middleware.isAdmin, userController.getUsers);
 router.get('/user/:id', authController.middleware.isAdmin, userController.getUser);
+router.post('/user', authController.middleware.isAdmin, userController.setUserAdmin);
 
 // IMAGES
 router.post('/image', authController.middleware.isAdmin, imageController.uploadImage);
