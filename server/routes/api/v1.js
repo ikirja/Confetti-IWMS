@@ -46,6 +46,7 @@ router.get('/warehouse/:warehouseId', authController.middleware.isAdmin, warehou
 // ORDERS
 router.post('/order', authController.middleware.isAdmin, orderController.createOrder);
 router.get('/order', authController.middleware.isAdmin, orderController.getOrders);
+router.get('/order/:id', authController.middleware.isAdmin, orderController.getOrder);
 router.post('/order/status', authController.middleware.isAdmin, orderController.changeStatus);
 router.post('/order/product', authController.middleware.isAdmin, orderController.changeProducts);
 router.post('/order/cancel', authController.middleware.isAdmin, orderController.cancelOrder);

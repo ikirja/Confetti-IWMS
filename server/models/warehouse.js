@@ -26,7 +26,7 @@ const warehouseSchema = new Schema({
   connectionWarehouse: {
     type: String,
     required: true,
-    default: ''
+    default: 'default'
   },
   products: [
     {

@@ -3,7 +3,7 @@ const logger = require(__basedir + '/server/lib/logger');
 
 module.exports = async (req, res) => {
   try {
-    const orders = await Order.find();
+    const orders = await Order.find().populate('customer').populate('status').populate('warehouse').sort('-orderId');
     res.status(200).json(orders);
   } catch (err) {
     logger.createLog({

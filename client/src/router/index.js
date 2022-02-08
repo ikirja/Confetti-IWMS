@@ -23,6 +23,11 @@ const routes = [
     component: () => import('@/views/ecommerce/order/Order.vue')
   },
   {
+    path: '/ecommerce/order/:id',
+    name: 'OrderDetail',
+    component: () => import('@/views/ecommerce/order/OrderDetail.vue')
+  },
+  {
     path: '/ecommerce/order/order-status',
     name: 'OrderStatus',
     component: () => import('@/views/ecommerce/order/OrderStatus.vue')

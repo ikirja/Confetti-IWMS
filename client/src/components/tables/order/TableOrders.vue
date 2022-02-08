@@ -14,6 +14,7 @@
         <th>Создан</th>
         <th>Обновлён</th>
         <th class="all">Номер</th>
+        <th>Статус</th>
         <th>Клиент</th>
         <th>Склад</th>
         <th>Действие</th>
@@ -32,10 +33,15 @@
         </td>
         <td>{{ moment(order.createdAt).format("DD/MM/YYYY") }}</td>
         <td>{{ moment(order.updatedAt).format("DD/MM/YYYY") }}</td>
-        <td>{{ order.orderId }}</td>
-        <td>{{ order.customer }}</td>
-        <td>{{ order.warehouse }}</td>
-        <td></td>
+        <td><strong>{{ order.orderId }}</strong></td>
+        <td>{{ order.status.title }}</td>
+        <td>{{ order.customer.title }}</td>
+        <td>{{ order.warehouse.title }}</td>
+        <td>
+          <a :href="'/ecommerce/order/' + order._id" class="action-icon">
+            <i class="mdi mdi-eye"></i
+          ></a>
+        </td>
       </tr>
     </tbody>
   </table>
