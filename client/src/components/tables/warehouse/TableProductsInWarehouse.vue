@@ -47,7 +47,7 @@
   <table class="table table-striped table-centered w-100 dt-responsive nowrap">
     <thead class="table-light">
       <tr>
-        <th class="all" style="width: 20px">
+        <th class="all" style="width: 20px" v-if="!setIsDisabled">
           <div class="form-check">
             <input v-model="checkedAll" type="checkbox" class="form-check-input" id="checkProducts" />
             <label class="form-check-label" for="checkProducts">&nbsp;</label>
@@ -70,7 +70,7 @@
         v-for="(productInWarehouse, index) in productsInWarehouse"
         :key="productInWarehouse.product._id"
       >
-        <td>
+        <td v-if="!setIsDisabled">
           <div class="form-check">
             <input type="checkbox" v-model="productInWarehouse.checked" class="form-check-input" :id="'customCheck' + index" />
             <label class="form-check-label" :for="'customCheck' + index">&nbsp;</label>

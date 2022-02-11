@@ -157,7 +157,6 @@ export default {
   setup() {
     const store = useStore();
     const user = computed(() => jwtDecode(store.state.token));
-    console.log(user.value);
 
     function logout() {
       store.dispatch('logout');

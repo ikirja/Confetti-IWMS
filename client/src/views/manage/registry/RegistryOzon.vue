@@ -140,8 +140,6 @@ export default {
 
         for (const prop in entry.fields) {
           let info = '';
-          console.log(prop)
-          console.log(entry.fields[prop])
           prop === 'taskId' ? info = `Task ID: ${entry.fields[prop]} ` : '';
 
           if (prop === 'status') {
