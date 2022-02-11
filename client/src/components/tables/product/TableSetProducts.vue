@@ -77,9 +77,11 @@
             <input
               type="text"
               v-model="products[index].sku"
+              @input="checkIfExists(index)"
               class="form-control"
               :id="'input' + index"
             />
+            <small v-if="product.exist" class="bg-danger text-white">Товар с таким артикулом есть!</small>
           </div>
         </td>
         <td>
@@ -230,6 +232,16 @@ export default {
       products.value.splice(index, 1);
     }
 
+    async function checkIfExists(index) {
+      const response = await getProductBySku(products.value[index].sku);
+      if (response.error) products.value[index].exist = false;
+      if (!response.error) products.value[index].exist = true;
+    }
+
+    function getProductBySku(sku) {
+      return request('/api/v1/product/sku', 'POST', store.state.token, { sku });
+    }
+
     async function setProducts() {
       loading.value = true;
       errors.value = [];
@@ -266,6 +278,7 @@ export default {
       loading,
       addNewProductInput,
       removeProductInput,
+      checkIfExists,
       setProducts,
     };
   },
