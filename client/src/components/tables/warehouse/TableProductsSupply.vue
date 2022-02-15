@@ -237,9 +237,7 @@ export default {
     }
 
     function findPredictions(string) {
-      return productsInWarehouse.value.filter((product, index) => {
-        if (index < 5) return product.product.title.toLowerCase().includes(string.toLowerCase())
-      });
+      return productsInWarehouse.value.filter(product => product.product.title.toLowerCase().includes(string.toLowerCase()));
     }
 
     function setPredictionProduct(prediction, index) {
