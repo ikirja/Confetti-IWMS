@@ -171,6 +171,19 @@
               </router-link>
             </ul>
           </div>
+
+          <router-link
+            to="/manage/pricing"
+            v-slot="{ href, isActive }"
+            custom
+          >
+            <li class="side-nav-item" :class="{ 'menuitem-active': isActive }">
+              <a :href="href" class="side-nav-link">
+                <i class="uil-pricetag-alt"></i>
+                <span> Ценообразование </span>
+              </a>
+            </li>
+          </router-link>
         </li>
 
         <li class="side-nav-title side-nav-item mt-3">Найстройки</li>

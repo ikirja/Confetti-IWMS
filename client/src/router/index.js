@@ -53,6 +53,11 @@ const routes = [
     component: () => import('@/views/manage/registry/RegistryOzon.vue')
   },
   {
+    path: '/manage/pricing',
+    name: 'Pricing',
+    component: () => import('@/views/manage/Pricing.vue')
+  },
+  {
     path: '/admin/marketplace/ozon',
     name: 'MarketplaceOzon',
     component: () => import('@/views/admin/marketplace/MarketplaceOzon.vue')
