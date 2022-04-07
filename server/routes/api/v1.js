@@ -91,4 +91,9 @@ router.post('/marketplace/ozon/product-stocks', authController.middleware.isAdmi
 router.post('/marketplace/ozon/product-prices', authController.middleware.isAdmin, marketplace.ozonSellerApi.productPrices);
 router.post('/marketplace/ozon/warehouse-list', authController.middleware.isAdmin, marketplace.ozonSellerApi.warehouseList);
 
+// Wildberries Seller Api
+router.get('/marketplace/wildberries/get-config', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.config.get);
+router.post('/marketplace/wildberries/set-config', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.config.set);
+router.get('/marketplace/wildberries/prices/info', marketplace.wildberriesSellerApi.prices.info);
+
 module.exports = router;
