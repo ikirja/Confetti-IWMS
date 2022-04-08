@@ -48,8 +48,8 @@
 import TableProductsSupply from '@/components/tables/warehouse/TableProductsSupply.vue';
 import TableProductsInWarehouse from '@/components/tables/warehouse/TableProductsInWarehouse.vue';
 
-import getWarehouseList from '@/modules/marketplace/ozon/get-warehouse-list';
 import getConnections from '@/modules/warehouse/get-connections';
+import getConnectionWarehouses from '@/modules/marketplace/get-connection-warehouses';
 import setConnection from '@/modules/warehouse/set-connection';
 import setConnectionWarehouse from '@/modules/warehouse/set-connection-warehouse';
 
@@ -87,10 +87,9 @@ export default {
     }
 
     onMounted(async () => {
-      connections.value = await getConnections(store.state.token)
+      connections.value = await getConnections(store.state.token);
+      connectionWarehouses.value = await getConnectionWarehouses(warehouse.value, store.state.token);
       selectedConnection.value = warehouse.value.connection;
-
-      connectionWarehouses.value = await getWarehouseList(store.state.token);
       selectedConnectionWarehouse.value = warehouse.value.connectionWarehouse;
     });
 

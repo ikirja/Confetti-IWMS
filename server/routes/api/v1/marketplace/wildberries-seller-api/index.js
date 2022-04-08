@@ -7,7 +7,12 @@ const config = {
   set: require('./controllers/config/set-config')
 }
 
+const warehouse = {
+  list: require('./controllers/warehouse/list')
+}
+
 module.exports = {
   prices,
-  config
+  config,
+  warehouse
 }
