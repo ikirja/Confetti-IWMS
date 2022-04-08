@@ -4,8 +4,7 @@ const { warehouseList } = require (__basedir + '/server/lib/marketplace/ozon-sel
 module.exports = async (req, res) => {
   try {
     const ozonWarehouses = await warehouseList();
-
-    if (!ozonWarehouses.result || ozonWarehouses.result.length < 1) return res.status(404).json({ error: [ { message: 'Warehouses not founded' } ] });
+    if (!ozonWarehouses.result || ozonWarehouses.result.length < 1) return res.status(404).json({ error: [ { message: 'Warehouses not found' } ] });
 
     res.status(200).json(ozonWarehouses.result);
   } catch (err) {
