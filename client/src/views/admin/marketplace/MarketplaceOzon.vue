@@ -90,6 +90,9 @@ export default {
 
       const json = await request('/api/v1/marketplace/ozon/set-config', 'POST', store.state.token, settings.value);
       setCurrentSettings(json);
+
+      if (json.error) return;
+
       alert('Настройки успешно сохранены');
 
       loading.value = false;
