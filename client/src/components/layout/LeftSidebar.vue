@@ -211,6 +211,15 @@
                   <a :href="href">Ozon</a>
                 </li>
               </router-link>
+              <router-link
+                to="/admin/marketplace/wildberries"
+                v-slot="{ href, isActive }"
+                custom
+              >
+                <li :class="{ 'menuitem-active': isActive }">
+                  <a :href="href">Wildberries</a>
+                </li>
+              </router-link>
             </ul>
           </div>
         </li>

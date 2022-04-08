@@ -63,6 +63,11 @@ const routes = [
     component: () => import('@/views/admin/marketplace/MarketplaceOzon.vue')
   },
   {
+    path: '/admin/marketplace/wildberries',
+    name: 'MarketplaceWildberries',
+    component: () => import('@/views/admin/marketplace/MarketplaceWildberries.vue')
+  },
+  {
     path: '/admin/user',
     name: 'User',
     component: () => import('@/views/admin/User.vue')
