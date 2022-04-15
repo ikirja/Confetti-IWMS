@@ -72,6 +72,16 @@ const warehouseSchema = new Schema({
           type: String,
           default: ''
         }
+      },
+      wildberries: {
+        categoryId: {
+          type: Number,
+          default: 0
+        },
+        category: {
+          type: Object,
+          default: {}
+        }
       }
     }
   ],

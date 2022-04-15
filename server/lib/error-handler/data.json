@@ -1,0 +1,20 @@
+{
+  "warehouse": {
+    "product": {
+      "validation": {
+        "default": [],
+        "ozon": [],
+        "wildberries": [
+          {
+            "code": "1",
+            "message": "Wildberries Seller API: Category ID is required and must be a number"
+          },
+          {
+            "code": "2",
+            "message": "Wildberries Seller API: Category is required and must be an object"
+          }
+        ]
+      }
+    }
+  }
+}

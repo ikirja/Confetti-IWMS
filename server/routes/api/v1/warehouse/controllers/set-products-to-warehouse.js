@@ -11,8 +11,8 @@ module.exports = async (req, res) => {
 
   try {
     let foundWarehouse = await Warehouse.findOne({ _id: req.body.warehouseId });
-    if (!foundWarehouse) return res.status(404).json({ error: [ { message: 'Склад не найден' } ] });
-    if (!req.body.products || req.body.products.length === 0) return res.status(422).json({ errors: [ { message: 'Товары отсутствуют' } ] });
+    if (!foundWarehouse) return res.status(404).json({ error: [ { message: 'Warehouse not found' } ] });
+    if (!req.body.products || req.body.products.length === 0) return res.status(422).json({ errors: [ { message: 'Products are required' } ] });
 
     const validated = await validateProductsForWarehouse(req.body.products);
     if (validated.errors.length > 0) return res.status(422).json({ error: validated.errors });
@@ -31,22 +31,23 @@ module.exports = async (req, res) => {
         product.quantity ? foundWarehouse.products[index].quantity = foundWarehouse.products[index].quantity + product.quantity : '';
         product.discount ? foundWarehouse.products[index].discount = product.discount : '';
         product.ozon ? foundWarehouse.products[index].ozon = product.ozon : '';
+        product.wildberries ? foundWarehouse.products[index].wildberries = product.wildberries : '';
         
         updatedProducts.push(product);
       }
     });
 
-    foundWarehouse.save();
+    await foundWarehouse.save();
   } catch (err) {
     logger.createLog({
-      title: 'Ошибка',
+      title: 'Error',
       errorCode: 'W0005',
       data: JSON.stringify(err) ? JSON.stringify(err) : '',
-      message: 'Ошибка добавления и/или обновления товара на складе',
+      message: 'Error occured while adding or updating products in warehouse',
       path: __filename
     });
 
-    return res.status(400).json({ error: [ { message: 'Ошибка добавления и/или обновления товара на складе' } ] });
+    return res.status(400).json({ error: [ { message: 'Error occured while adding or updating products in warehouse' } ] });
   }
 
   await warehouseRegistries.warehouse('set-products-to-warehouse', {

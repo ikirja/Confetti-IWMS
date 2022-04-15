@@ -50,11 +50,11 @@
         </th>
         <th>#</th>
         <th class="all">Товар</th>
-        <th v-if="warehouse?.connection === 'ozon-seller-api'">РРЦ</th>
+        <th v-if="warehouseIsForMarketplace()">РРЦ</th>
         <th>Цена</th>
         <th>Количество</th>
-        <th v-if="warehouse?.connection === 'ozon-seller-api'" style="width: 250px">Категория</th>
-        <th v-if="warehouse?.connection === 'ozon-seller-api'">Характеристики</th>
+        <th v-if="warehouseIsForMarketplace()" style="width: 250px">Категория</th>
+        <th v-if="warehouseIsForMarketplace()">Характеристики</th>
       </tr>
     </thead>
     <tbody>
@@ -75,9 +75,12 @@
           <div>Штрихкод: {{ product.product.barcode }}</div>
           <div>ЗЦ: {{ product.product.purchasePrice }}</div>
         </td>
-        <td v-if="warehouse?.connection === 'ozon-seller-api'">
-          <div>
+        <td v-if="warehouseIsForMarketplace()">
+          <div v-if="warehouse?.connection === 'ozon-seller-api'">
             <strong>{{ product.ozon.rrp }}</strong>
+          </div>
+          <div v-if="warehouse?.connection === 'wildberries-seller-api'">
+            <strong>{{ product.wildberries.rrp }}</strong>
           </div>
         </td>
         <td>
@@ -104,24 +107,37 @@
             />
           </div>
         </td>
-        <td v-if="warehouse?.connection === 'ozon-seller-api'">
-          <SelectCategory
-            v-if="!product.ozon.category"
-            :product-id="product._id"
-            @selected-category="selectCategoryForProduct"
-            @remove-category-from-product="removeCategoryFromProduct"
-          />
-          <small v-if="product.ozon.category" class="text-secondary fw-bold">Категория: <span class="text-info">{{ product.ozon.category.title }}</span></small>
+        <td v-if="warehouseIsForMarketplace()">
+          <div v-if="warehouse?.connection === 'ozon-seller-api'">
+            <SelectCategoryOzon
+              v-if="!product.ozon.category"
+              :product-id="product._id"
+              @selected-category="selectCategoryForProduct"
+              @remove-category-from-product="removeCategoryFromProduct"
+            />
+            <small v-if="product.ozon.category" class="text-secondary fw-bold">Категория: <span class="text-info">{{ product.ozon.category.title }}</span></small>
+          </div>
+          <div v-if="warehouse?.connection === 'wildberries-seller-api'">
+            <SelectCategoryWildberries
+              v-if="!product.wildberries.category"
+              :product-id="product._id"
+              @selected-category="selectCategoryForProduct"
+              @remove-category-from-product="removeCategoryFromProduct"
+            />
+            <small v-if="product.wildberries.category" class="text-secondary fw-bold">Категория: <span class="text-info">{{ product.wildberries.category.name }}</span></small>
+          </div>
         </td>
-        <td v-if="warehouse?.connection === 'ozon-seller-api'">
-          <button class="btn btn-primary" @click="toggleModal(product.product._id)" :disabled="!product.ozon.category">Характеристики</button>
-          <ModalAttributes
-            :show="product.ozon.showModal"
-            :product="product"
-            @select-attributes-for-product="selectAttributesForProduct"
-            @toggle-modal="toggleModal"
-          />
-          <small v-if="product.ozon.attributes?.length > 0" class="text-success fw-bold">Характеристики указаны</small>
+        <td v-if="warehouseIsForMarketplace()">
+          <div v-if="warehouse?.connection === 'ozon-seller-api'">
+            <button class="btn btn-primary" @click="toggleModal(product.product._id)" :disabled="!product.ozon.category">Характеристики</button>
+            <ModalAttributesOzon
+              :show="product.ozon.showModal"
+              :product="product"
+              @select-attributes-for-product="selectAttributesForProduct"
+              @toggle-modal="toggleModal"
+            />
+            <small v-if="product.ozon.attributes?.length > 0" class="text-success fw-bold">Характеристики указаны</small>
+          </div>
         </td>
       </tr>
     </tbody>
@@ -152,20 +168,23 @@
 </template>
 
 <script>
-import SelectCategory from '@/components/forms/SelectCategory.vue';
-import ModalAttributes from '@/components/modals/marketplace/ozon/ModalAttributes.vue';
+import SelectCategoryOzon from '@/components/forms/ozon/SelectCategoryOzon.vue';
+import SelectCategoryWildberries from '@/components/forms/wildberries/SelectCategoryWildberries.vue';
+import ModalAttributesOzon from '@/components/modals/marketplace/ozon/ModalAttributesOzon.vue';
 
 import { ref, onMounted, watchEffect, computed } from "vue";
 import { useStore } from "vuex";
 import request from '@/modules/request';
 import setProductsToWarehouse from '@/modules/warehouse/set-products-to-warehouse';
 import getOzonRRP from '@/modules/marketplace/ozon/get-ozon-rrp';
+import getWildberriesRRP from '@/modules/marketplace/wildberries/get-wildberries-rrp';
 
 export default {
   props: [ 'setIsDisabled' ],
   components: {
-    SelectCategory,
-    ModalAttributes
+    SelectCategoryOzon,
+    SelectCategoryWildberries,
+    ModalAttributesOzon
   },
   setup() {
     const store = useStore();
@@ -202,16 +221,50 @@ export default {
             rrp: getOzonRRP(product)
           }
         }
+
+        if (warehouse.value.connection === 'wildberries-seller-api') {
+          product.wildberries = {
+            showModal: false,
+            rrp: getWildberriesRRP(product)
+          }
+        }
       });
 
       products.value = responseProducts.filter(product => !productIdsInWarehouse.includes(product._id.toString()));
     }
 
+    function warehouseIsForMarketplace() {
+      let isForMarketplace = false;
+
+      if (warehouse.value.connection === 'ozon-seller-api') isForMarketplace = true;
+      if (warehouse.value.connection === 'wildberries-seller-api') isForMarketplace = true;
+
+      return isForMarketplace;
+    }
+
+    function getWarehouseMarketplaceName() {
+      if (warehouseIsForMarketplace()) {
+        let marketplace = '';
+
+        if (warehouse.value.connection === 'ozon-seller-api') marketplace = 'ozon';
+        if (warehouse.value.connection === 'wildberries-seller-api') marketplace = 'wildberries';
+
+        return marketplace;
+      } else {
+        return null;
+      }
+    }
+
     async function selectCategoryForProduct({ category, productId }) {
       products.value.forEach(product => {
         if (product.product._id.toString() === productId.toString()) {
-          product.ozon.categoryId = category.category_id;
-          product.ozon.category = category;
+          const marketplace = getWarehouseMarketplaceName();
+
+          if (marketplace) {
+            if (marketplace === 'ozon') product[marketplace].categoryId = category.category_id;
+            if (marketplace === 'wildberries') product[marketplace].categoryId = category.id;
+            product[marketplace].category = category;
+          }
         }
       });
     }
@@ -219,8 +272,12 @@ export default {
     function removeCategoryFromProduct(productId) {
       products.value.forEach(product => {
         if (product.product._id.toString() === productId.toString()) {
-          product.ozon.categoryId = null;
-          product.ozon.category = null;
+          const marketplace = getWarehouseMarketplaceName();
+
+          if (marketplace) {
+            product[marketplace].categoryId = null;
+            product[marketplace].category = null;
+          }
         }
       });
     }
@@ -293,6 +350,7 @@ export default {
       errors,
       checkedAll,
       loading,
+      warehouseIsForMarketplace,
       selectCategoryForProduct,
       removeCategoryFromProduct,
       selectAttributesForProduct,

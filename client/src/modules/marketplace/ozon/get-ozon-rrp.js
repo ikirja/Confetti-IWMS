@@ -1,10 +1,11 @@
 export default function getOzonRRP(product) {
-  const purchasePrice = product.purchasePrice;
-  const taxes = 0.486;
+  const PURCHASE_PRICE = product.purchasePrice ? product.purchasePrice : product.product.purchasePrice;
+  const PRODUCT_WEIGHT = product.weight ? product.weight : product.product.weight;
+  const TAXES = 0.514;
 
-  let weightCommission = (19 * product.weight) / 1000;
-  if (weightCommission < 50) weightCommission = 50;
-  if (weightCommission > 500) weightCommission = 500;
+  let WEIGHT_COMMISSION = (19 * PRODUCT_WEIGHT) / 1000;
+  if (WEIGHT_COMMISSION < 50) WEIGHT_COMMISSION = 50;
+  if (WEIGHT_COMMISSION > 500) WEIGHT_COMMISSION = 500;
   
-  return ((purchasePrice + weightCommission) / taxes).toFixed(2);
+  return ((PURCHASE_PRICE + WEIGHT_COMMISSION) / (1 - TAXES)).toFixed(2);
 }

@@ -115,6 +115,7 @@ import Breadcrumbs from '@/components/layout/Breadcrumbs.vue';
 
 import { ref } from 'vue';
 import getOzonRrp from '@/modules/marketplace/ozon/get-ozon-rrp';
+import getWildberriesRrp from '@/modules/marketplace/wildberries/get-wildberries-rrp';
 
 export default {
   components: {
@@ -156,7 +157,7 @@ export default {
       errors.value = [];
 
       if (pricing.marketplace === 'ozon') return rrp.value = getOzonRrp(validated.product);
-      if (pricing.marketplace === 'wildberries') return alert('Расчтёт РРЦ для Wildberries в разработке');
+      if (pricing.marketplace === 'wildberries') return rrp.value = getWildberriesRrp(validated.product);
     }
 
     return {
