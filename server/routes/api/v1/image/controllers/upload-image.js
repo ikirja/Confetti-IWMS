@@ -2,6 +2,7 @@ const Image = require(__basedir + '/server/models/image');
 const Product = require(__basedir + '/server/models/product');
 const sharp = require('sharp');
 const logger = require(__basedir + '/server/lib/logger');
+const imageRegistries = require('./registries.js');
 
 module.exports = async (req, res) => {
   const base64regex = /^([0-9a-zA-Z+/]{3})*(([0-9a-zA-Z+/]{3}==)|([0-9a-zA-Z+/]{3}=))?$/;
