@@ -55,14 +55,14 @@
         </th>
         <th>#</th>
         <th class="all">Товар</th>
-        <th v-if="warehouseIsForMarketplace()">РРЦ</th>
+        <th v-if="marketplaceName">РРЦ</th>
         <th>Цена</th>
         <th>Поступление</th>
         <th>Кол-во на складе</th>
         <th v-if="warehouse?.connection === 'ozon-seller-api'">Offer ID</th>
         <th v-if="warehouse?.connection === 'ozon-seller-api'">Product ID</th>
-        <th v-if="warehouseIsForMarketplace()" style="width: 250px">Категория</th>
-        <th v-if="warehouseIsForMarketplace()">Характеристики</th>
+        <th v-if="marketplaceName" style="width: 250px">Категория</th>
+        <th v-if="marketplaceName">Характеристики</th>
       </tr>
     </thead>
     <tbody>
@@ -83,7 +83,7 @@
           <div>Штрихкод: {{ productInWarehouse.product.barcode }}</div>
           <div>ЗЦ: {{ productInWarehouse.product.purchasePrice }}</div>
         </td>
-        <td v-if="warehouseIsForMarketplace()">
+        <td v-if="marketplaceName">
           <div v-if="warehouse?.connection === 'ozon-seller-api'">
             <strong>{{ productInWarehouse.ozon.rrp }}</strong>
           </div>
@@ -130,7 +130,7 @@
           <div v-if="productInWarehouse.ozon.productId">{{ productInWarehouse.ozon.productId }}</div>
           <div v-else>Товар не выгружен</div>
         </td>
-        <td v-if="warehouseIsForMarketplace()">
+        <td v-if="marketplaceName">
           <div v-if="warehouse?.connection === 'ozon-seller-api'">
             <SelectCategoryOzon
               v-if="!productInWarehouse.ozon.category"
@@ -150,16 +150,26 @@
             <small v-if="productInWarehouse.wildberries.category" class="text-secondary fw-bold">Категория: <span class="text-info">{{ productInWarehouse.wildberries.category.name }}</span></small>
           </div>
         </td>
-        <td v-if="warehouseIsForMarketplace()">
+        <td v-if="marketplaceName">
           <div v-if="warehouse?.connection === 'ozon-seller-api'">
             <button class="btn btn-primary" @click="toggleModal(productInWarehouse.product._id)" :disabled="!productInWarehouse.ozon.category">Характеристики</button>
             <ModalAttributesOzon
               :show="productInWarehouse.ozon.showModal"
               :product="productInWarehouse"
-              @select-attributes-for-product="selectAttributesForProduct"
+              @select-attributes-for-product="selectOzonAttributesForProduct"
               @toggle-modal="toggleModal"
             />
             <small v-if="productInWarehouse.ozon.attributes?.length > 0" class="text-success fw-bold">Характеристики указаны</small>
+          </div>
+          <div v-if="warehouse?.connection === 'wildberries-seller-api'">
+            <button class="btn btn-primary" @click="toggleModal(productInWarehouse.product._id)" :disabled="!productInWarehouse.wildberries.category">Характеристики</button>
+            <ModalAttributesWildberries
+              :show="productInWarehouse.wildberries.showModal"
+              :product="productInWarehouse"
+              @select-attributes-for-product="selectWildberriesAttributesForProduct"
+              @toggle-modal="toggleModal"
+            />
+            <small v-if="productInWarehouse.wildberries.attributes?.length > 0" class="text-success fw-bold">Характеристики указаны</small>
           </div>
         </td>
       </tr>
@@ -194,27 +204,31 @@
 import SelectCategoryOzon from '@/components/forms/ozon/SelectCategoryOzon.vue';
 import SelectCategoryWildberries from '@/components/forms/wildberries/SelectCategoryWildberries.vue';
 import ModalAttributesOzon from '@/components/modals/marketplace/ozon/ModalAttributesOzon.vue';
+import ModalAttributesWildberries from '@/components/modals/marketplace/wildberries/ModalAttributesWildberries.vue';
 
 import { ref, onMounted, watchEffect, computed } from 'vue';
 import { useStore } from 'vuex';
-import request from '@/modules/request';
+
+import getWarehouseMarketplaceName from '@/modules/warehouse/get-warehouse-marketplace-name';
+import getWarehouseWithProducts from '@/modules/warehouse/get-warehouse-with-products';
+import getSelectedOzonAttributes from '@/modules/warehouse/get-selected-ozon-attributes';
+import getSelectedWildberriesAttributes from '@/modules/warehouse/get-selected-wildberries-attributes';
+import addToMarketplaceFromWarehouse from '@/modules/warehouse/add-to-marketplace-from-warehouse';
+import updateProductsToMarketplaceFromWarehouse from '@/modules/warehouse/update-products-to-marketplace-from-warehouse';
 import setProductsToWarehouse from '@/modules/warehouse/set-products-to-warehouse';
-import getOzonRRP from '@/modules/marketplace/ozon/get-ozon-rrp';
-import getWildberriesRRP from '@/modules/marketplace/wildberries/get-wildberries-rrp';
-import addToOzon from '@/modules/warehouse/add-to-ozon';
-import updateStocksOzon from '@/modules/warehouse/update-stocks-ozon';
-import updatePricesOzon from '@/modules/warehouse/update-prices-ozon';
 
 export default {
   props: [ 'setIsDisabled' ],
   components: {
     SelectCategoryOzon,
     SelectCategoryWildberries,
-    ModalAttributesOzon
+    ModalAttributesOzon,
+    ModalAttributesWildberries
   },
   setup() {
     const store = useStore();
     const warehouse = computed(() => store.state.warehouses.currentWarehouse);
+    const marketplaceName = computed(() => getWarehouseMarketplaceName(warehouse.value))
     const productsInWarehouse = ref([]);
     const addedProducts = ref([]);
     const updatedProducts = ref([]);
@@ -222,114 +236,52 @@ export default {
     let checkedAll = ref(false);
     let loading = ref(false);
 
-    onMounted(async () => await getWarehouseWithProducts());
+    onMounted(async () => productsInWarehouse.value = await getWarehouseWithProducts({ warehouse: warehouse.value, token: store.state.token }));
 
     watchEffect(() => {
       if (checkedAll.value) productsInWarehouse.value.forEach(product => product.checked = true);
       if (!checkedAll.value) productsInWarehouse.value.forEach(product => product.checked = false);
     });
 
-    async function getWarehouseWithProducts() {
-      const url = `/api/v1/warehouse/${warehouse.value._id}`;
-      const jsonData = await request(url, 'GET', store.state.token);
-
-      if (jsonData.products) {
-        jsonData.products.forEach(product => {
-          product.checked = false;
-          product.inStock = product.quantity;
-          product.quantity = 0;
-
-          if (warehouse.value.connection === 'ozon-seller-api') {
-            product.ozon.showModal = false;
-            product.ozon.rrp = getOzonRRP(product);
-          }
-
-          if (warehouse.value.connection === 'wildberries-seller-api') {
-            product.wildberries.showModal = false;
-            product.wildberries.rrp = getWildberriesRRP(product);
-          }
-        });
-
-        productsInWarehouse.value = jsonData.products;
-      }
-    }
-
-    function warehouseIsForMarketplace() {
-      let isForMarketplace = false;
-
-      if (warehouse.value.connection === 'ozon-seller-api') isForMarketplace = true;
-      if (warehouse.value.connection === 'wildberries-seller-api') isForMarketplace = true;
-
-      return isForMarketplace;
-    }
-
-    function getWarehouseMarketplaceName() {
-      if (warehouseIsForMarketplace()) {
-        let marketplace = '';
-
-        if (warehouse.value.connection === 'ozon-seller-api') marketplace = 'ozon';
-        if (warehouse.value.connection === 'wildberries-seller-api') marketplace = 'wildberries';
-
-        return marketplace;
-      } else {
-        return null;
-      }
-    }
-
     async function selectCategoryForProduct({ category, productId }) {
+      if (!marketplaceName.value) return;
+
       productsInWarehouse.value.forEach(productInWarehouse => {
         if (productInWarehouse.product._id.toString() === productId.toString()) {
-          const marketplace = getWarehouseMarketplaceName();
-
-          if (marketplace) {
-            if (marketplace === 'ozon') productInWarehouse[marketplace].categoryId = category.category_id;
-            if (marketplace === 'wildberries') productInWarehouse[marketplace].categoryId = category.id;
-            productInWarehouse[marketplace].category = category;
-          }
+          if (marketplaceName.value === 'ozon') productInWarehouse[marketplaceName.value].categoryId = category.category_id;
+          if (marketplaceName.value === 'wildberries') productInWarehouse[marketplaceName.value].categoryId = category.id;
+          productInWarehouse[marketplaceName.value].category = category;
         }
       });
     }
 
     function removeCategoryFromProduct(productId) {
+      if (!marketplaceName.value) return;
+
       productsInWarehouse.value.forEach(productInWarehouse => {
         if (productInWarehouse.product._id.toString() === productId.toString()) {
-          const marketplace = getWarehouseMarketplaceName();
-
-          if (marketplace) {
-            productInWarehouse[marketplace].categoryId = null;
-            productInWarehouse[marketplace].category = null;
-          }
+          productInWarehouse[marketplaceName.value].categoryId = null;
+          productInWarehouse[marketplaceName.value].category = null;
         }
       });
     }
 
-    function selectAttributesForProduct({ product, attributes }) {
-      let selectedAttributes = [];
-
-      attributes.forEach(attribute => {
-        if (attribute.inputValue.length > 0) {
-          let selectedAttribute = {
-            complex_id: 0,
-            id: attribute.id,
-            values: []
-          }
-
-          if (attribute.is_collection && attribute.selectedValue) {
-            selectedAttribute.values.push({
-              dictionary_value_id: attribute.selectedValue.id,
-              value: attribute.selectedValue.value
-            });
-          } else {
-            selectedAttribute.values.push({
-              value: attribute.inputValue
-            });
-          }
-
-          selectedAttributes.push(selectedAttribute);
-        }
-      });
-
+    function selectOzonAttributesForProduct({ product, attributes }) {
+      const selectedAttributes = getSelectedOzonAttributes(attributes);
       if (selectedAttributes.length > 0) product.ozon.attributes = selectedAttributes;
+
+      toggleModal(product.product._id);
+    }
+
+    function selectWildberriesAttributesForProduct({ product }) {
+      const selectedAttributes = getSelectedWildberriesAttributes(product);
+
+      if (!selectedAttributes.isSet) {
+        alert('Не все обязательные характеристики заполнены');
+        return;
+      }
+
+      product.wildberries.category.addin = selectedAttributes.addins;
 
       toggleModal(product.product._id);
     }
@@ -337,46 +289,23 @@ export default {
     function toggleModal(productInWarehouseId) {
       productsInWarehouse.value.forEach(productInWarehouse => {
         if (productInWarehouse.product._id.toString() === productInWarehouseId.toString()) {
-          productInWarehouse.ozon.showModal = !productInWarehouse.ozon.showModal;
           const body = document.querySelector("body");
-          productInWarehouse.ozon.showModal ? body.classList.add("modal-open") : body.classList.remove("modal-open");
+
+          productInWarehouse[marketplaceName.value].showModal = !productInWarehouse[marketplaceName.value].showModal;
+          productInWarehouse[marketplaceName.value].showModal ? body.classList.add("modal-open") : body.classList.remove("modal-open");
         }
       });
     }
 
     async function addToMarketplace() {
-      const body = {
-        warehouseId: warehouse.value._id,
-        products: []
-      }
-
-      productsInWarehouse.value.forEach(productInWarehouse => productInWarehouse.checked ? body.products.push(productInWarehouse.product._id) : '');
-      if (body.products.length === 0) return alert('Не выбраны товары');
-
-      const jsonData = await addToOzon(body, store.state.token);
-      if (jsonData.error) return alert(JSON.stringify(jsonData));
-
-      alert('Успешно');
+      const responseMessage = await addToMarketplaceFromWarehouse(marketplaceName.value, warehouse.value, productsInWarehouse.value, store.state.token);
+      alert(responseMessage);
     }
 
     async function updateProductsToMarketplace(type) {
-      const body = {
-        warehouseId: warehouse.value._id,
-        products: []
-      }
-
-      if (type === 'stocks') productsInWarehouse.value.forEach(productInWarehouse => productInWarehouse.quantity = productInWarehouse.inStock);
-
-      body.products = productsInWarehouse.value.filter(productInWarehouse => productInWarehouse.checked);
-      if (body.products.length === 0) return alert('Не выбраны товары');
-
-      let jsonData = null;
-      if (type === 'stocks') jsonData = await updateStocksOzon(body, store.state.token);
-      if (type === 'prices') jsonData = await updatePricesOzon(body, store.state.token);
-      if (jsonData.error) return alert(JSON.stringify(jsonData));
-
-      getWarehouseWithProducts();
-      alert('Успешно');
+      const responseMessage = await updateProductsToMarketplaceFromWarehouse(marketplaceName.value, warehouse.value, productsInWarehouse.value, type, store.state.token);
+      productsInWarehouse.value = await getWarehouseWithProducts({ warehouse: warehouse.value, token: store.state.token });
+      alert(responseMessage);
     }
 
     async function setProducts() {
@@ -393,23 +322,24 @@ export default {
       if (response?.addedProducts?.length > 0) addedProducts.value = response.addedProducts;
       if (response?.updatedProducts?.length > 0) updatedProducts.value = response.updatedProducts;
 
-      await getWarehouseWithProducts();
+      productsInWarehouse.value = await getWarehouseWithProducts({ warehouse: warehouse.value, token: store.state.token });
 
       loading.value = false;
     }
     
     return {
       warehouse,
+      marketplaceName,
       productsInWarehouse,
       addedProducts,
       updatedProducts,
       errors,
       checkedAll,
       loading,
-      warehouseIsForMarketplace,
       selectCategoryForProduct,
       removeCategoryFromProduct,
-      selectAttributesForProduct,
+      selectOzonAttributesForProduct,
+      selectWildberriesAttributesForProduct,
       toggleModal,
       addToMarketplace,
       updateProductsToMarketplace,

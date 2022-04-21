@@ -8,6 +8,10 @@ const config = {
   set: require('./controllers/config/set-config')
 }
 
+const dictionary = {
+  get: require('./controllers/dictionary')
+}
+
 const prices = {
   info: require('./controllers/prices/info')
 }
@@ -23,6 +27,7 @@ const warehouse = {
 module.exports = {
   category,
   config,
+  dictionary,
   prices,
   product,
   warehouse

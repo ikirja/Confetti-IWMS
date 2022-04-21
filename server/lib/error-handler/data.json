@@ -1,4 +1,7 @@
 {
+  "common": {
+    "checkData": "Check data"
+  },
   "warehouse": {
     "product": {
       "validation": {
@@ -15,6 +18,16 @@
           }
         ]
       }
+    }
+  },
+  "marketplace": {
+    "wildberries": {
+      "dictionary": [
+        {
+          "code": "400",
+          "message": "Error has occured while getting dictionary from Wildberries Seller API"
+        }
+      ]
     }
   }
 }

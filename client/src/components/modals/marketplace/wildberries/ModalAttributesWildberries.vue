@@ -1,5 +1,5 @@
 <template>
-  <div v-if="product.ozon.category">
+  <div v-if="product.wildberries.category">
     <div
       class="modal fade"
       :class="{ show: show, 'd-block': show }"
@@ -32,36 +32,35 @@
                 :key="attribute"
               >
                 <label for="1" class="form-label"
-                  >ID: {{ attribute.id }} - {{ attribute.name }}</label
+                  >ID: {{ attribute.id }} - {{ attribute.type }}</label
                 >
                 <input
                   v-model="attribute.inputValue"
                   :type="attribute.inputType"
                   :id="attribute.id"
                   class="form-control"
-                  :disabled="attribute.selectedValue"
+                  :disabled="attribute.selectedValue || attribute.type === 'Наименование' || attribute.type === 'Описание'"
                 />
                 <small
                   >
-                  <span v-if="attribute.type === 'String' || attribute.type === 'URL' || attribute.type === 'ImageURL' || attribute.type === 'multiline'">Тип: Строка </span>
-                  <span v-if="attribute.type === 'Decimal' || attribute.type === 'Integer'">Тип: Число </span>
-                  <span v-if="attribute.type === 'Boolean'">Тип: Булево </span>
-                  <span v-if="attribute.is_required" class="text-danger">Обязательно </span>
-                  <span v-if="attribute.is_collection" class="text-warning">Справочник</span>
+                  <span v-if="!attribute.isNumber">Тип: Строка </span>
+                  <span v-if="attribute.isNumber">Тип: Число </span>
+                  <span v-if="attribute.required" class="text-danger">Обязательно </span>
+                  <span v-if="attribute.useOnlyDictionaryValues" class="text-warning">Справочник</span>
                 </small
                 >
                 <div
                   v-if="
-                    attribute.is_collection && attribute.foundValues?.length > 0
+                    attribute.useOnlyDictionaryValues && attribute.foundValues?.length > 0
                   "
                   class="dropdown-attribute-menu"
                 >
                   <small>Начните вводить данные</small>
-                  <div v-for="value in attribute.foundValues" :key="value.id">
+                  <div v-for="value in attribute.foundValues" :key="value.key">
                     <span
                       @click="selectAttributeValue(attribute, value)"
                       class="dropdown-attribute-menu__value"
-                      >{{ value.value }}</span
+                      >{{ value.key }}</span
                     >
                   </div>
                 </div>
@@ -102,7 +101,7 @@ export default {
 
     watchEffect(async () => {
       if (props.show) {
-        await getCategoryAttributes(props.product.ozon.category);
+        getCategoryAttributes();
         setInputValueForAttributes();
       }
     });
@@ -111,12 +110,12 @@ export default {
       attributes,
       (attributes) => {
         attributes.forEach(async (attribute) => {
-          if (attribute?.is_collection && attribute?.inputValue?.length > 1) {
+          if (attribute?.useOnlyDictionaryValues && attribute?.inputValue?.length > 1) {
             const prevAttribute = prevAttributes.value.find(
-              (prevAttribute) => prevAttribute.id === attribute.id
+              (prevAttribute) => prevAttribute.type === attribute.type
             );
 
-            if (!prevAttribute.inputValue) {
+            if (!prevAttribute?.inputValue) {
               setPrevAttributes();
               return;
             }
@@ -126,18 +125,8 @@ export default {
 
               setPrevAttributes();
 
-              let values = await getCategoryAttributeValues(
-                props.product.ozon.category,
-                attribute
-              );
-
-              values = values.result.filter((item) =>
-                item.value
-                  .toLowerCase()
-                  .includes(attribute.inputValue.toLowerCase())
-              );
-
-              attribute.foundValues = values;
+              let json = await getAttributeValues(attribute);
+              if (json?.data.length > 0) attribute.foundValues = json.data;
             }
           }
         });
@@ -145,74 +134,51 @@ export default {
       { deep: true }
     );
 
-    function setPrevAttributes() {
-      prevAttributes.value = JSON.parse(JSON.stringify(attributes.value));
-    }
-
     function toggleModal() {
       emit("toggleModal", props.product.product._id);
     }
 
-    async function getCategoryAttributes(category) {
-      const url = "/api/v1/marketplace/ozon/get-category-attribute";
-      const json = await request(url, "POST", store.state.token, {
-        categoryId: category.category_id,
-      });
-      attributes.value = json.result[0].attributes;
-      prevAttributes.value = JSON.parse(
-        JSON.stringify(json.result[0].attributes)
-      );
+    function setPrevAttributes() {
+      prevAttributes.value = JSON.parse(JSON.stringify(attributes.value));
+    }
+
+    function getCategoryAttributes() {
+      attributes.value = props.product.wildberries.category.addin.filter(attribute => attribute.isAvailable);
     }
 
     function setInputValueForAttributes() {
       attributes.value.forEach((attribute) => {
-        const foundValueInProduct = props.product.ozon?.attributes?.find(productAttribute => productAttribute.id === attribute.id);
-
-        attribute.foundValues = [];
-        attribute.selectedValue = null;
-        if (
-          attribute.type === "String" ||
-          attribute.type === "URL" ||
-          attribute.type === "ImageURL" ||
-          attribute.type === "multiline"
-        ) {
-          attribute.inputType = "text";
-          attribute.inputValue = foundValueInProduct ? foundValueInProduct.values[0].value : '';
-        }
-
-        if (attribute.type === "Decimal" || attribute.type === "Integer") {
+        if (attribute.isNumber) {
           attribute.inputType = "number";
-          attribute.inputValue = foundValueInProduct ? foundValueInProduct.values[0].value : 0;
-        }
-
-        if (attribute.type === "Boolean") {
+          attribute.inputValue = attribute.params && attribute.params[0].value ? attribute.params[0].value : 0;
+        } else {
           attribute.inputType = "text";
-          attribute.inputValue = foundValueInProduct ? foundValueInProduct.values[0].value : '';
+          attribute.inputValue = attribute.params && attribute.params[0].value ? attribute.params[0].value : '';
         }
-
-        // if (attribute.is_collection && foundValueInProduct) attribute.selectedValue = foundValueInProduct.values[0];
       });
     }
 
-    async function getCategoryAttributeValues(category, attribute) {
-      const url = "/api/v1/marketplace/ozon/get-category-attribute-values";
-      const json = await request(url, "POST", store.state.token, {
-        categoryId: category.category_id,
-        attributeId: attribute.id,
-        lastValueId: 0,
-        limit: 5000,
+    async function getAttributeValues(attribute) {
+      if (!attribute.useOnlyDictionaryValues) return null;
+
+      const url = '/api/v1/marketplace/wildberries/dictionary';
+      const json = await request(url, 'POST', store.state.token, {
+        url: attribute.dictionary,
+        top: 100,
+        pattern: attribute.inputValue
       });
+
       return json;
     }
 
     function selectAttributeValue(attribute, value) {
       attribute.foundValues = [];
-      attribute.inputValue = value.value;
+      attribute.inputValue = value.key;
       attribute.selectedValue = value;
     }
 
     function saveSelectedAttributes() {
-      emit('selectAttributesForProduct', { product: props.product, attributes: attributes.value });
+      emit('selectAttributesForProduct', { product: props.product });
     }
 
     return {
