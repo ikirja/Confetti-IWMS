@@ -5,7 +5,7 @@ const { config } = require(__basedir + '/server/lib/marketplace/wildberries-sell
 
 module.exports = async (req, res) => {
   if (!req.body.warehouseId) return res.status(422).json({ error: [ { message: 'Warehouse ID is required' } ] });
-  if (!req.body.product) return res.status(422).json({ error: [ { message: 'Product ID are required' } ] });
+  if (!req.body.product) return res.status(422).json({ error: [ { message: 'Product ID is required' } ] });
 
   const config = config.get();
 
@@ -24,88 +24,76 @@ module.exports = async (req, res) => {
       "jsonrpc": "2.0",
       "params": {
         "card": {
-          "addin": [
-            {
-              "params": [
-                {
-                  "count": 0,
-                  "units": "string",
-                  "value": "string"
-                }
-              ],
-              "type": "string"
-            }
-          ],
+          "addin": foundProductInWarehouse.wildberries.category.addin,
           "countryProduction": "Россия",
-          "createdAt": "",
-          "id": "",
-          "imtId": 0,
-          "imtSupplierId": 0,
-          "nomenclatures": [
-            {
-              "addin": [
-                {
-                  "params": [
-                    {
-                      "count": 0,
-                      "units": "string",
-                      "value": "string"
-                    }
-                  ],
-                  "type": "string"
-                }
-              ],
-              "concatVendorCode": "string",
-              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-              "isArchive": true,
-              "nmId": 0,
-              "variations": [
-                {
-                  "addin": [
-                    {
-                      "params": [
-                        {
-                          "count": 0,
-                          "units": "string",
-                          "value": "string"
-                        }
-                      ],
-                      "type": "string"
-                    }
-                  ],
-                  "barcode": foundProductInWarehouse.product.barcode,
-                  "chrtId": 0,
-                  "id": ""
-                }
-              ],
-              "vendorCode": foundProductInWarehouse.product.sku
-            }
-          ],
-          "object": "ЭТО КАТЕГОРИЯ!",
-          "parent": "ЭТО РОДИТЕЛЬСКАЯ КАТЕГОРИЯ!",
-          "supplierId": "",
-          "supplierVendorCode": foundProductInWarehouse.product.barcode,
-          "updatedAt": "",
-          "uploadID": "",
-          "userId": 0
-        },
-        "supplierID": ""
+          // "createdAt": "",
+          // "id": "",
+          // "imtId": 0,
+          // "imtSupplierId": 0,
+          // "nomenclatures": [
+          //   {
+          //     "addin": [
+          //       {
+          //         "params": [
+          //           {
+          //             "count": 0,
+          //             "units": "string",
+          //             "value": "string"
+          //           }
+          //         ],
+          //         "type": "string"
+          //       }
+          //     ],
+          //     "concatVendorCode": "string",
+          //     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          //     "isArchive": true,
+          //     "nmId": 0,
+          //     "variations": [
+          //       {
+          //         "addin": [
+          //           {
+          //             "params": [
+          //               {
+          //                 "count": 0,
+          //                 "units": "string",
+          //                 "value": "string"
+          //               }
+          //             ],
+          //             "type": "string"
+          //           }
+          //         ],
+          //         "barcode": foundProductInWarehouse.product.barcode,
+          //         "chrtId": 0,
+          //         "id": ""
+          //       }
+          //     ],
+          //     "vendorCode": foundProductInWarehouse.product.sku
+          //   }
+          // ],
+          "object": foundProductInWarehouse.wildberries.category.id,
+          "parent": foundProductInWarehouse.wildberries.category.parent_id,
+          // "supplierId": "",
+          // "supplierVendorCode": foundProductInWarehouse.product.barcode,
+          // "updatedAt": "",
+          // "uploadID": "",
+          // "userId": 0
+        }
+        // "supplierID": ""
       }
     };
 
     const response = await product.create(productPayload);
     console.log(response);
 
-    // записываем выгрузку в регистр сведений
-    // if (false) {
-    //   const createdRegistry = await Registry.create({
-    //     type: 'wildberries',
-    //     title: 'product-create',
-    //     fields: {
-    //       product: productPayload
-    //     }
-    //   });
-    // }
+    if (false) {
+      const createdRegistry = await Registry.create({
+        type: 'wildberries',
+        title: 'product-create',
+        fields: {
+          product: productPayload
+        }
+      });
+    }
 
     // возвращаем респонс?
     res.status(200).json(response);
