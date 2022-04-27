@@ -3,20 +3,20 @@
     <!-- LOGO -->
     <a href="/" class="logo text-center logo-light">
       <span class="logo-lg">
-        <img src="assets/images/logo-confetti.png" alt="" height="75" />
+        <img src="/assets/images/logo-confetti.png" alt="" height="75" />
       </span>
       <span class="logo-sm">
-        <img src="assets/images/logo-confetti.png" alt="" height="50" />
+        <img src="/assets/images/logo-confetti.png" alt="" height="50" />
       </span>
     </a>
 
     <!-- LOGO -->
     <a href="/" class="logo text-center logo-dark">
       <span class="logo-lg">
-        <img src="assets/images/logo-confetti.png" alt="" height="75" />
+        <img src="/assets/images/logo-confetti.png" alt="" height="75" />
       </span>
       <span class="logo-sm">
-        <img src="assets/images/logo-confetti.png" alt="" height="50" />
+        <img src="/assets/images/logo-confetti.png" alt="" height="50" />
       </span>
     </a>
 
