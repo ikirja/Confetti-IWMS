@@ -52,17 +52,23 @@
                 >
                 <div
                   v-if="
-                    attribute.is_collection && attribute.foundValues?.length > 0
+                    attribute.is_collection && attribute.foundValues?.length > 0 || attribute.isLoading
                   "
                   class="dropdown-attribute-menu"
                 >
                   <small>Начните вводить данные</small>
-                  <div v-for="value in attribute.foundValues" :key="value.id">
-                    <span
-                      @click="selectAttributeValue(attribute, value)"
-                      class="dropdown-attribute-menu__value"
-                      >{{ value.value }}</span
-                    >
+                  <div v-if="attribute.isLoading" class="d-flex align-items-center">
+                    <strong class="text-primary">Загрузка...</strong>
+                    <div class="spinner-border spinner-border-sm text-primary ms-auto" role="status" aria-hidden="true"></div>
+                  </div>
+                  <div v-if="!attribute.isLoading">
+                    <div v-for="value in attribute.foundValues" :key="value.id">
+                      <span
+                        @click="selectAttributeValue(attribute, value)"
+                        class="dropdown-attribute-menu__value"
+                        >{{ value.value }}</span
+                      >
+                    </div>
                   </div>
                 </div>
               </div>
@@ -91,7 +97,9 @@
 <script>
 import { ref, watch, watchEffect } from "vue";
 import { useStore } from "vuex";
+
 import request from "@/modules/request";
+import isSpecialCollectionAttribute from '@/modules/marketplace/ozon/is-special-collection-attribute';
 
 export default {
   props: ["show", "product"],
@@ -111,7 +119,7 @@ export default {
       attributes,
       (attributes) => {
         attributes.forEach(async (attribute) => {
-          if (attribute?.is_collection && attribute?.inputValue?.length > 1) {
+          if (attribute?.is_collection && attribute?.inputValue?.length > 0) {
             const prevAttribute = prevAttributes.value.find(
               (prevAttribute) => prevAttribute.id === attribute.id
             );
@@ -126,6 +134,8 @@ export default {
 
               setPrevAttributes();
 
+              attribute.isLoading = true;
+
               let values = await getCategoryAttributeValues(
                 props.product.ozon.category,
                 attribute
@@ -138,6 +148,7 @@ export default {
               );
 
               attribute.foundValues = values;
+              attribute.isLoading = false;
             }
           }
         });
@@ -170,6 +181,7 @@ export default {
 
         attribute.foundValues = [];
         attribute.selectedValue = null;
+        attribute.isLoading = false;
         if (
           attribute.type === "String" ||
           attribute.type === "URL" ||
@@ -190,18 +202,30 @@ export default {
           attribute.inputValue = foundValueInProduct ? foundValueInProduct.values[0].value : '';
         }
 
+        const isSpecial = isSpecialCollectionAttribute(attribute);
+        
+        if (isSpecial) {
+          attribute.is_collection = true;
+          attribute.is_required = true;
+        }
+
         // if (attribute.is_collection && foundValueInProduct) attribute.selectedValue = foundValueInProduct.values[0];
       });
     }
 
-    async function getCategoryAttributeValues(category, attribute) {
+    async function getCategoryAttributeValues(category, attribute, prevResult = []) {
       const url = "/api/v1/marketplace/ozon/get-category-attribute-values";
       const json = await request(url, "POST", store.state.token, {
         categoryId: category.category_id,
         attributeId: attribute.id,
-        lastValueId: 0,
+        lastValueId: prevResult.length > 0 ? prevResult[prevResult.length - 1].id : 0,
         limit: 5000,
       });
+
+      json.result = [ ...prevResult, ...json.result ];
+
+      if (json.has_next) return getCategoryAttributeValues(category, attribute, json.result);
+
       return json;
     }
 
