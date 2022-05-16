@@ -6,9 +6,10 @@
       </div>
     </div>
     <div class="col-6 d-flex justify-content-end align-items-center" v-if="!setIsDisabled">
-      <button @click="updateProductsToMarketplace('prices')" class="btn btn-outline-warning me-3">Обновить цены</button>
-      <button @click="updateProductsToMarketplace('stocks')" class="btn btn-outline-warning me-3">Обновить остатки</button>
-      <button @click="addToMarketplace" class="btn btn-outline-success">Добавить на маркетплейс</button>
+      <button @click="updateProductsToMarketplace('prices')" class="btn btn-outline-warning me-3" :disabled="isLoadingMarketplace">Обновить цены</button>
+      <button @click="updateProductsToMarketplace('stocks')" class="btn btn-outline-warning me-3" :disabled="isLoadingMarketplace">Обновить остатки</button>
+      <button @click="setImtId" class="btn btn-outline-info me-3" :disabled="isLoadingMarketplace">Записать ID {{ marketplaceName }}</button>
+      <button @click="addToMarketplace" class="btn btn-outline-success" :disabled="isLoadingMarketplace">Добавить на маркетплейс</button>
     </div>
   </div>
   <div
@@ -60,7 +61,7 @@
         <th>Поступление</th>
         <th>Кол-во на складе</th>
         <th v-if="warehouse?.connection === 'ozon-seller-api'">Offer ID</th>
-        <th v-if="warehouse?.connection === 'ozon-seller-api'">Product ID</th>
+        <th v-if="warehouse?.connection === 'ozon-seller-api' || warehouse?.connection === 'wildberries-seller-api'">Product ID</th>
         <th v-if="marketplaceName" style="width: 250px">Категория</th>
         <th v-if="marketplaceName">Характеристики</th>
       </tr>
@@ -126,8 +127,8 @@
           <div v-if="productInWarehouse.ozon.offerId">{{ productInWarehouse.ozon.offerId }}</div>
           <div v-else>Товар не выгружен</div>
         </td>
-        <td v-if="warehouse?.connection === 'ozon-seller-api'">
-          <div v-if="productInWarehouse.ozon.productId">{{ productInWarehouse.ozon.productId }}</div>
+        <td v-if="warehouse?.connection === 'ozon-seller-api' || warehouse?.connection === 'wildberries-seller-api'">
+          <div v-if="productInWarehouse[marketplaceName].productId">{{ productInWarehouse[marketplaceName].productId }}</div>
           <div v-else>Товар не выгружен</div>
         </td>
         <td v-if="marketplaceName">
@@ -214,6 +215,8 @@ import getWarehouseWithProducts from '@/modules/warehouse/get-warehouse-with-pro
 import getSelectedOzonAttributes from '@/modules/warehouse/get-selected-ozon-attributes';
 import getSelectedWildberriesAttributes from '@/modules/warehouse/get-selected-wildberries-attributes';
 import addToMarketplaceFromWarehouse from '@/modules/warehouse/add-to-marketplace-from-warehouse';
+import setImtIdWildberries from '@/modules/warehouse/set-imt-id-wildberries';
+import getWbProductList from '@/modules/marketplace/wildberries/get-product-list';
 import updateProductsToMarketplaceFromWarehouse from '@/modules/warehouse/update-products-to-marketplace-from-warehouse';
 import setProductsToWarehouse from '@/modules/warehouse/set-products-to-warehouse';
 
@@ -235,6 +238,7 @@ export default {
     const errors = ref([]);
     let checkedAll = ref(false);
     let loading = ref(false);
+    let isLoadingMarketplace = ref(false);
 
     onMounted(async () => productsInWarehouse.value = await getWarehouseWithProducts({ warehouse: warehouse.value, token: store.state.token }));
 
@@ -298,18 +302,45 @@ export default {
     }
 
     async function addToMarketplace() {
+      isLoadingMarketplace.value = true;
+
       const responseMessage = await addToMarketplaceFromWarehouse(marketplaceName.value, warehouse.value, productsInWarehouse.value, store.state.token);
       alert(responseMessage);
+
+      isLoadingMarketplace.value = false;
+    }
+
+    async function setImtId() {
+      isLoadingMarketplace.value = true;
+
+      const wbProducts = await getWbProductList(1000, store.state.token);
+      if (wbProducts.error) return alert(JSON.stringify(wbProducts));
+
+      const responseMessage = await setImtIdWildberries({
+        warehouseId: warehouse.value._id,
+        wbProducts
+      }, store.state.token);
+
+      productsInWarehouse.value = await getWarehouseWithProducts({ warehouse: warehouse.value, token: store.state.token });
+
+      alert(responseMessage);
+
+      isLoadingMarketplace.value = false;
     }
 
     async function updateProductsToMarketplace(type) {
+      isLoadingMarketplace.value = true;
+
       const responseMessage = await updateProductsToMarketplaceFromWarehouse(marketplaceName.value, warehouse.value, productsInWarehouse.value, type, store.state.token);
       productsInWarehouse.value = await getWarehouseWithProducts({ warehouse: warehouse.value, token: store.state.token });
       alert(responseMessage);
+
+      isLoadingMarketplace.value = false;
     }
 
     async function setProducts() {
       loading.value = true;
+      isLoadingMarketplace.value = true;
 
       const productsToSet = productsInWarehouse.value.map(productInWarehouse => {
         productInWarehouse.product = productInWarehouse.product._id;
@@ -325,6 +356,7 @@ export default {
       productsInWarehouse.value = await getWarehouseWithProducts({ warehouse: warehouse.value, token: store.state.token });
 
       loading.value = false;
+      isLoadingMarketplace.value = false;
     }
     
     return {
@@ -336,12 +368,14 @@ export default {
       errors,
       checkedAll,
       loading,
+      isLoadingMarketplace,
       selectCategoryForProduct,
       removeCategoryFromProduct,
       selectOzonAttributesForProduct,
       selectWildberriesAttributesForProduct,
       toggleModal,
       addToMarketplace,
+      setImtId,
       updateProductsToMarketplace,
       setProducts
     }

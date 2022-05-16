@@ -17,7 +17,10 @@ const prices = {
 }
 
 const product = {
-  create: require('./controllers/product/create')
+  cardByImtId: require('./controllers/product/card-by-imt-id'),
+  create: require('./controllers/product/create'),
+  list: require('./controllers/product/list'),
+  update: require('./controllers/product/update')
 }
 
 const warehouse = {

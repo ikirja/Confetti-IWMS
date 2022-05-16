@@ -16,6 +16,13 @@ const prices = {
   info: require('./controllers/prices/info')
 }
 
+const product = {
+  create: require('./controllers/product/create'),
+  list: require('./controllers/product/list'),
+  setImtId: require('./controllers/product/set-imt-id'),
+  update: require('./controllers/product/update')
+}
+
 const warehouse = {
   list: require('./controllers/warehouse/list')
 }
@@ -25,5 +32,6 @@ module.exports = {
   config,
   dictionary,
   prices,
+  product,
   warehouse
 }

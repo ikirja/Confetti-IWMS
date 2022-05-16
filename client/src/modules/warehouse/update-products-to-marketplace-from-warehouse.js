@@ -18,12 +18,12 @@ export default async function updateProductsToMarketplaceFromWarehouse(marketpla
 
   let message = 'Успешно';
 
-  switch (marketplaceName.value) {
-    case 'ozon-seller-api':
+  switch (marketplaceName) {
+    case 'ozon':
       if (type === 'stocks') jsonData = await updateStocksOzon(body, token);
       if (type === 'prices') jsonData = await updatePricesOzon(body, token);
       break;
-    case 'wildberries-seller-api':
+    case 'wildberries':
       message = 'Функционал в разработке';
       break;
     default:

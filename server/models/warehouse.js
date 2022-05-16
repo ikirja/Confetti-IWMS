@@ -81,6 +81,10 @@ const warehouseSchema = new Schema({
         category: {
           type: Object,
           default: {}
+        },
+        productId: {
+          type: Number,
+          default: 0
         }
       }
     }

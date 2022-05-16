@@ -16,6 +16,12 @@ module.exports = async (req, res) => {
 
     const foundProductInWarehouse = foundWarehouse.products.find(productInWarehouse => productInWarehouse.product.image && productInWarehouse.product._id.toString() === req.body.product.toString());
     if (!foundProductInWarehouse) return res.status(404).json({ error: [ { message: 'Product has not been found in Warehouse' } ] });
+    if (!foundProductInWarehouse.wildberries.productId) return res.status(422).json({ error: [ { message: 'Product has not been created in Wildberries Seller API' } ] });
+
+    const wbProduct = await product.cardByImtId(foundProductInWarehouse.wildberries.productId);
+    if (!wbProduct.result && !wbProduct.result.card) return res.status(404).json({ error: [ { message: 'Product has not been found in Wildberries Seller API' } ] });
+
+    const WB_CARD = wbProduct.result.card;
 
     const filteredAddin = foundProductInWarehouse.wildberries.category.addin.filter(attribute => attribute.params && attribute.params.length > 0);
     const addin = filteredAddin.map(attribute => {
@@ -25,56 +31,44 @@ module.exports = async (req, res) => {
       }
     });
 
+    WB_CARD.object = foundProductInWarehouse.wildberries.category.name;
+    WB_CARD.addin = addin;
+    WB_CARD.nomenclatures[0].variations[0].addin = [
+      {
+        type: "Розничная цена",
+        params: [
+          {
+            count: foundProductInWarehouse.price
+          }
+        ]
+      }
+    ];
+    WB_CARD.nomenclatures[0].addin = [
+      {
+        type: "Фото",
+        params: []
+      },
+      {
+        type: "Фото360",
+        params: []
+      },
+      {
+        type: "Видео",
+        params: []
+      }
+    ];
+    
     const productPayload = {
       id: '1',
       jsonrpc: "2.0",
       params: {
-        card: {
-          countryProduction: "Россия",
-          object: foundProductInWarehouse.wildberries.category.name,
-          supplierVendorCode: foundProductInWarehouse.product.sku,
-          addin: addin,
-          nomenclatures: [
-            {
-              vendorCode: foundProductInWarehouse.product.sku,
-              variations: [
-                {
-                  barcode: foundProductInWarehouse.product.barcode,
-                  addin: [
-                    {
-                      type: "Розничная цена",
-                      params: [
-                        {
-                          count: foundProductInWarehouse.price
-                        }
-                      ]
-                    }
-                  ],
-                }
-              ],
-              addin: [
-                {
-                  type: "Фото",
-                  params: []
-                },
-                {
-                  type: "Фото360",
-                  params: []
-                },
-                {
-                  type: "Видео",
-                  params: []
-                }
-              ]
-            }
-          ]
-        }
+        card: WB_CARD
       }
     };
 
     const createdRegistryForId = await Registry.create({
       type: 'wildberries',
-      title: 'product-create-id',
+      title: 'product-update-id',
       fields: {
         product: foundProductInWarehouse.product.sku
       }
@@ -82,11 +76,11 @@ module.exports = async (req, res) => {
 
     productPayload.id = createdRegistryForId._id.toString();
 
-    const response = await product.create(productPayload);
+    const response = await product.update(productPayload);
 
     const createdRegistry = await Registry.create({
       type: 'wildberries',
-      title: 'product-create',
+      title: 'product-update',
       fields: {
         taskId: response.id,
         status: 'created',
@@ -101,10 +95,10 @@ module.exports = async (req, res) => {
       title: 'Ошибка',
       errorCode: 'WB0001',
       data: JSON.stringify(err) ? JSON.stringify(err) : '',
-      message: 'Error has occured while import products to Wildberries Seller API',
+      message: 'Error has occured while updating product in Wildberries Seller API',
       path: __filename
     });
 
-    res.status(400).json({ error: [ { message: 'Error has occured while import products to Wildberries Seller API' } ] });
+    res.status(400).json({ error: [ { message: 'Error has occured while updating product in Wildberries Seller API' } ] });
   }
 }

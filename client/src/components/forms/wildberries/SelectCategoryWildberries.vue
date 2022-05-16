@@ -38,7 +38,10 @@ export default {
         parent: selectedParent.value.name
       });
 
-      if (json.data && Array.isArray(json.data)) categoriesByParent.value = json.data;
+      if (json.data && Array.isArray(json.data)) {
+        json.data.sort((a, b) => a.name.localeCompare(b.name));
+        categoriesByParent.value = json.data;
+      }
     }
 
     function setCategoryForProduct() {
