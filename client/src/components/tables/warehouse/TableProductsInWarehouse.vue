@@ -8,7 +8,7 @@
     <div class="col-6 d-flex justify-content-end align-items-center" v-if="!setIsDisabled">
       <button @click="updateProductsToMarketplace('prices')" class="btn btn-outline-warning me-3" :disabled="isLoadingMarketplace">Обновить цены</button>
       <button @click="updateProductsToMarketplace('stocks')" class="btn btn-outline-warning me-3" :disabled="isLoadingMarketplace">Обновить остатки</button>
-      <button @click="setImtId" class="btn btn-outline-info me-3" :disabled="isLoadingMarketplace">Записать ID {{ marketplaceName }}</button>
+      <button @click="setImtId" v-if="marketplaceName === 'wildberries'" class="btn btn-outline-info me-3" :disabled="isLoadingMarketplace">Записать ID {{ marketplaceName }}</button>
       <button @click="addToMarketplace" class="btn btn-outline-success" :disabled="isLoadingMarketplace">Добавить на маркетплейс</button>
     </div>
   </div>
