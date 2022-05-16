@@ -13,7 +13,8 @@ const dictionary = {
 }
 
 const prices = {
-  info: require('./controllers/prices/info')
+  info: require('./controllers/prices/info'),
+  update: require('./controllers/prices/update')
 }
 
 const product = {

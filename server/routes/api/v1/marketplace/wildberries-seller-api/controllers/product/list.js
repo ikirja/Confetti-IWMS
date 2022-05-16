@@ -5,19 +5,7 @@ module.exports = async (req, res) => {
   if (!req.body.limit) return res.status(422).json({ error: [ { message: 'Limit is required' } ] });
 
   try {
-    const payload = {
-      id: '1',
-      jsonrpc: "2.0",
-      params: {
-        query: {
-          limit: req.body.limit,
-          offset: 0
-        },
-        withError: false
-      }
-    };
-
-    const response = await product.list(payload);
+    const response = await product.list(req.body.limit);
     const wbProducts = response.result?.cards?.length > 0 ? response.result.cards : [];
 
     res.status(200).json(wbProducts);

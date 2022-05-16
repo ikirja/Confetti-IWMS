@@ -1,5 +1,6 @@
 import updateStocksOzon from '@/modules/warehouse/update-stocks-ozon';
 import updatePricesOzon from '@/modules/warehouse/update-prices-ozon';
+import updatePricesWildberries from '@/modules/warehouse/update-prices-wildberries';
 
 export default async function updateProductsToMarketplaceFromWarehouse(marketplaceName, warehouse, productsInWarehouse, type, token) {
   if (!marketplaceName) return 'Склад не привязан к маркетплейсу';
@@ -24,7 +25,8 @@ export default async function updateProductsToMarketplaceFromWarehouse(marketpla
       if (type === 'prices') jsonData = await updatePricesOzon(body, token);
       break;
     case 'wildberries':
-      message = 'Функционал в разработке';
+      if (type === 'stocks') message = 'Функционал в разработке';
+      if (type === 'prices') jsonData = await updatePricesWildberries(body, token);
       break;
     default:
       message = 'Маркетплейса не существует';
