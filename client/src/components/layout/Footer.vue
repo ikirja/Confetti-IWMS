@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-6">
-          confetti.app.version.1.0.0_beta_3
+          confetti.app.version.1.0.0_beta_4
         </div>
         <div class="col-md-6">
           <div class="text-md-end footer-links d-none d-md-block">
