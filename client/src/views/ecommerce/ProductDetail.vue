@@ -51,6 +51,7 @@
                   <h3 class="mt-0">
                     {{ product.title }}
                   </h3>
+                  <p class="mb-1"><a class="btn btn-primary btn-sm" @click.prevent="toggleModal" href="#">Редактировать</a></p>
                   <p class="mb-1">Создан: {{ moment(product.createdAt).format('DD/MM/YYYY') }}</p>
                   <p class="font-16">
                     <span class="text-warning mdi mdi-star"></span>
@@ -197,10 +198,16 @@
       </div>
     </div>
   </div>
+  <ModalProductEdit
+    :show="showModal"
+    :product="product"
+    @toggle-modal="toggleModal"
+  />
 </template>
 
 <script>
 import Breadcrumbs from '@/components/layout/Breadcrumbs.vue';
+import ModalProductEdit from '@/components/modals/product/ModalProductEdit.vue';
 
 import { ref, onMounted, getCurrentInstance } from 'vue';
 import { useStore } from 'vuex';
@@ -209,12 +216,14 @@ import request from '@/modules/request'
 
 export default {
   components: {
-    Breadcrumbs
+    Breadcrumbs,
+    ModalProductEdit
   },
   setup() {
     const store = useStore();
     const route = useRoute();
     const product = ref({});
+    let showModal = ref(false);
 
     const internalInstance = getCurrentInstance();
     const moment = internalInstance.appContext.config.globalProperties.$moment;
@@ -237,7 +246,7 @@ export default {
       });
 
       if (json.error) return alert('Произошла ошибка');
-      await getProduct();
+      getProduct();
     }
 
     async function deleteProductImage(image) {
@@ -250,11 +259,22 @@ export default {
       getProduct();
     }
 
+    function toggleModal() {
+      showModal.value = !showModal.value;
+
+      const body = document.querySelector("body");
+      showModal.value ? body.classList.add("modal-open") : body.classList.remove("modal-open");
+
+      getProduct();
+    }
+
     return {
       product,
       moment,
+      showModal,
       setProductMainImage,
-      deleteProductImage
+      deleteProductImage,
+      toggleModal
     }
   },
 };
