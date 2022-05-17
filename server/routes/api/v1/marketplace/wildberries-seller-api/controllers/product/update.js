@@ -2,6 +2,7 @@ const Warehouse = require(__basedir + '/server/models/warehouse');
 const Registry = require(__basedir + '/server/models/registry');
 const { product } = require (__basedir + '/server/lib/marketplace/wildberries-seller-api');
 const logger = require(__basedir + '/server/lib/logger');
+const sendProductPhotos = require('./send-product-photos');
 
 module.exports = async (req, res) => {
   if (!req.body.warehouseId) return res.status(422).json({ error: [ { message: 'Warehouse ID is required' } ] });
@@ -31,6 +32,8 @@ module.exports = async (req, res) => {
       }
     });
 
+    const photos = photos = await sendProductPhotos(foundProductInWarehouse);
+
     WB_CARD.object = foundProductInWarehouse.wildberries.category.name;
     WB_CARD.addin = addin;
     WB_CARD.nomenclatures[0].variations[0].addin = [
@@ -46,7 +49,7 @@ module.exports = async (req, res) => {
     WB_CARD.nomenclatures[0].addin = [
       {
         type: "Фото",
-        params: []
+        params: photos
       },
       {
         type: "Фото360",
