@@ -22,6 +22,7 @@ const product = {
   create: require('./controllers/product/create'),
   list: require('./controllers/product/list'),
   photo: require('./controllers/product/photo'),
+  stocks: require('./controllers/product/stocks'),
   update: require('./controllers/product/update')
 }
 

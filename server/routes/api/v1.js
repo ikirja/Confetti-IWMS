@@ -102,6 +102,7 @@ router.post('/marketplace/wildberries/prices/update', marketplace.wildberriesSel
 router.post('/marketplace/wildberries/product/create', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.product.create);
 router.post('/marketplace/wildberries/product/list', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.product.list);
 router.post('/marketplace/wildberries/product/set-imt-id', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.product.setImtId);
+router.post('/marketplace/wildberries/product/stocks', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.product.stocks);
 router.post('/marketplace/wildberries/product/update', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.product.update);
 router.post('/marketplace/wildberries/warehouse-list', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.warehouse.list);
 

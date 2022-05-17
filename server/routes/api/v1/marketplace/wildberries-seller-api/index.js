@@ -21,6 +21,7 @@ const product = {
   create: require('./controllers/product/create'),
   list: require('./controllers/product/list'),
   setImtId: require('./controllers/product/set-imt-id'),
+  stocks: require('./controllers/product/stocks'),
   update: require('./controllers/product/update')
 }
 

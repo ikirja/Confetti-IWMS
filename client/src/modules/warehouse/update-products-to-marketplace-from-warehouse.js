@@ -1,5 +1,6 @@
 import updateStocksOzon from '@/modules/warehouse/update-stocks-ozon';
 import updatePricesOzon from '@/modules/warehouse/update-prices-ozon';
+import updateStocksWildberries from '@/modules/warehouse/update-stocks-wildberries';
 import updatePricesWildberries from '@/modules/warehouse/update-prices-wildberries';
 
 export default async function updateProductsToMarketplaceFromWarehouse(marketplaceName, warehouse, productsInWarehouse, type, token) {
@@ -25,7 +26,7 @@ export default async function updateProductsToMarketplaceFromWarehouse(marketpla
       if (type === 'prices') jsonData = await updatePricesOzon(body, token);
       break;
     case 'wildberries':
-      if (type === 'stocks') message = 'Функционал в разработке';
+      if (type === 'stocks') jsonData = await updateStocksWildberries(body, token);
       if (type === 'prices') jsonData = await updatePricesWildberries(body, token);
       break;
     default:
