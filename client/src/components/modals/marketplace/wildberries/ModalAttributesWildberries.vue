@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import { ref, watch, watchEffect } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useStore } from "vuex";
 import request from "@/modules/request";
 
@@ -99,11 +99,9 @@ export default {
     const attributes = ref([]);
     const prevAttributes = ref([]);
 
-    watchEffect(async () => {
-      if (props.show) {
-        getCategoryAttributes();
-        setInputValueForAttributes();
-      }
+    onMounted(() => {
+      getCategoryAttributes();
+      setInputValueForAttributes();
     });
 
     watch(
@@ -150,7 +148,7 @@ export default {
       attributes.value.forEach((attribute) => {
         if (attribute.isNumber) {
           attribute.inputType = "number";
-          attribute.inputValue = attribute.params && attribute.params[0].value ? attribute.params[0].value : 0;
+          attribute.inputValue = attribute.params && attribute.params[0].count ? attribute.params[0].count : 0;
         } else {
           attribute.inputType = "text";
           attribute.inputValue = attribute.params && attribute.params[0].value ? attribute.params[0].value : '';
@@ -178,7 +176,7 @@ export default {
     }
 
     function saveSelectedAttributes() {
-      emit('selectAttributesForProduct', { product: props.product });
+      emit('selectAttributesForProduct', { product: props.product, attributes: attributes.value });
     }
 
     return {

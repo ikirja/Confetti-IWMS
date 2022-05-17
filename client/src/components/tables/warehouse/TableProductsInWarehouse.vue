@@ -277,8 +277,8 @@ export default {
       toggleModal(product.product._id);
     }
 
-    function selectWildberriesAttributesForProduct({ product }) {
-      const selectedAttributes = getSelectedWildberriesAttributes(product);
+    function selectWildberriesAttributesForProduct({ product, attributes }) {
+      const selectedAttributes = getSelectedWildberriesAttributes(product, attributes);
 
       if (!selectedAttributes.isSet) {
         alert('Не все обязательные характеристики заполнены');

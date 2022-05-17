@@ -1,8 +1,8 @@
-export default function getSelectedWildberriesAttributes(product) {
+export default function getSelectedWildberriesAttributes(product, attributes) {
   let isSet = true;
   let addins = [];
 
-  product.wildberries.category.addin.forEach(attribute => {
+  attributes.forEach(attribute => {
     if (attribute.type === 'Наименование') {
       attribute.params = [ { value: product.product.title }];
       addins.push(attribute);
@@ -15,7 +15,8 @@ export default function getSelectedWildberriesAttributes(product) {
       return;
     }
 
-    if (attribute.inputValue.length > 0) attribute.params = [ { value: attribute.inputValue } ];
+    if (attribute.isNumber && attribute.inputValue > 0) attribute.params = [ { count: Number(attribute.inputValue) } ];
+    if (!attribute.isNumber && attribute.inputValue.length > 0) attribute.params = [ { value: attribute.inputValue } ];
 
     if (attribute.required) {
       if (attribute.useOnlyDictionaryValues && !attribute.selectedValue) isSet = false;
