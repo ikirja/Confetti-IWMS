@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
       }
     });
 
-    const photos = photos = await sendProductPhotos(foundProductInWarehouse);
+    const photos = await sendProductPhotos(foundProductInWarehouse);
 
     WB_CARD.object = foundProductInWarehouse.wildberries.category.name;
     WB_CARD.addin = addin;
