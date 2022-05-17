@@ -72,6 +72,9 @@
           <a @click.prevent="toggleModal(product._id)" href="#" class="action-icon">
             <i class="mdi mdi-file-upload"></i>
           </a>
+          <a @click.prevent="archiveProduct(product._id)" href="#" class="action-icon">
+            <i class="uil-trash-alt"></i
+          ></a>
           <ModalImageUpload
             :show="product.showModal"
             :product="product"
@@ -119,10 +122,20 @@ export default {
       });
     }
 
+    async function archiveProduct(productId) {
+      const json = await request('/api/v1/product/archive', 'POST', store.state.token, { productId });
+
+      if (json.error) return alert(JSON.stringify(json));
+
+      getProducts();
+      alert('Успешно');
+    }
+
     return {
       products,
       moment,
-      toggleModal
+      toggleModal,
+      archiveProduct
     };
   }
 }
