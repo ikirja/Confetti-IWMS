@@ -27,11 +27,10 @@ module.exports = async (req, res) => {
 
     const filteredAddin = foundProductInWarehouse.wildberries.category.addin.filter(attribute => attribute.params && attribute.params.length > 0);
     const filteredNomenclatureVariationAddin = foundProductInWarehouse.wildberries.category.nomenclature.variation.addin.filter(attribute => attribute.params && attribute.params.length > 0);
-    const filteredNomenclatureAddin = foundProductInWarehouse.wildberries.category.nomenclature.addin.filter(attribute => attribute.params && attribute.params.length > 0);
+    // TODO: Надо также добавить характеристики nomenclature.addin, но там надо добавлять ТОЛЬКО НОВЫЕ!
 
     const addin = getAddinArray(filteredAddin);
     const nomenclatureVariationAddin = getAddinArray(filteredNomenclatureVariationAddin);
-    const nomenclatureAddin = getAddinArray(filteredNomenclatureAddin);
 
     const photos = await sendProductPhotos(foundProductInWarehouse);
 
@@ -60,8 +59,7 @@ module.exports = async (req, res) => {
       {
         type: "Видео",
         params: []
-      },
-      ...nomenclatureAddin
+      }
     ];
     
     const productPayload = {
