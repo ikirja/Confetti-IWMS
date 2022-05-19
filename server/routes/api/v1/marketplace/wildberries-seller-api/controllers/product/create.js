@@ -2,6 +2,7 @@ const Warehouse = require(__basedir + '/server/models/warehouse');
 const Registry = require(__basedir + '/server/models/registry');
 const { product } = require (__basedir + '/server/lib/marketplace/wildberries-seller-api');
 const logger = require(__basedir + '/server/lib/logger');
+const getAddinArray = require('./get-addin-array');
 
 module.exports = async (req, res) => {
   if (!req.body.warehouseId) return res.status(422).json({ error: [ { message: 'Warehouse ID is required' } ] });
@@ -18,12 +19,12 @@ module.exports = async (req, res) => {
     if (!foundProductInWarehouse) return res.status(404).json({ error: [ { message: 'Product has not been found in Warehouse' } ] });
 
     const filteredAddin = foundProductInWarehouse.wildberries.category.addin.filter(attribute => attribute.params && attribute.params.length > 0);
-    const addin = filteredAddin.map(attribute => {
-      return {
-        type: attribute.type,
-        params: attribute.params
-      }
-    });
+    const filteredNomenclatureVariationAddin = foundProductInWarehouse.wildberries.category.nomenclature.variation.addin.filter(attribute => attribute.params && attribute.params.length > 0);
+    const filteredNomenclatureAddin = foundProductInWarehouse.wildberries.category.nomenclature.addin.filter(attribute => attribute.params && attribute.params.length > 0);
+
+    const addin = getAddinArray(filteredAddin);
+    const nomenclatureVariationAddin = getAddinArray(filteredNomenclatureVariationAddin);
+    const nomenclatureAddin = getAddinArray(filteredNomenclatureAddin);
 
     const productPayload = {
       id: '1',
@@ -48,7 +49,8 @@ module.exports = async (req, res) => {
                           count: foundProductInWarehouse.price
                         }
                       ]
-                    }
+                    },
+                    ...nomenclatureVariationAddin
                   ],
                 }
               ],
@@ -64,7 +66,8 @@ module.exports = async (req, res) => {
                 {
                   type: "Видео",
                   params: []
-                }
+                },
+                ...nomenclatureAddin
               ]
             }
           ]

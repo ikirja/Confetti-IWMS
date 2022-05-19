@@ -277,15 +277,21 @@ export default {
       toggleModal(product.product._id);
     }
 
-    function selectWildberriesAttributesForProduct({ product, attributes }) {
-      const selectedAttributes = getSelectedWildberriesAttributes(product, attributes);
+    function selectWildberriesAttributesForProduct({ product, attributes, attributesNomenslatureVariation, attributesNomenslature }) {
+      const selectedAttributes = getSelectedWildberriesAttributes(product, attributes, attributesNomenslatureVariation, attributesNomenslature);
 
-      if (!selectedAttributes.isSet) {
+      if (
+        !selectedAttributes.attributes.isSet ||
+        !selectedAttributes.attributesNomenclatureVariation.isSet ||
+        !selectedAttributes.attributesNomenclature.isSet
+      ) {
         alert('Не все обязательные характеристики заполнены');
         return;
       }
 
-      product.wildberries.category.addin = selectedAttributes.addins;
+      product.wildberries.category.addin = selectedAttributes.attributes.addins;
+      product.wildberries.category.nomenclature.variation.addin = selectedAttributes.attributesNomenclatureVariation.addins;
+      product.wildberries.category.nomenclature.addin = selectedAttributes.attributesNomenclature.addins;
 
       toggleModal(product.product._id);
     }

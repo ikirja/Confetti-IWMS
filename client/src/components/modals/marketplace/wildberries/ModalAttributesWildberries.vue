@@ -32,7 +32,95 @@
                 :key="attribute"
               >
                 <label for="1" class="form-label"
-                  >ID: {{ attribute.id }} - {{ attribute.type }}</label
+                  >ID: {{ attribute.type }}</label
+                >
+                <input
+                  v-model="attribute.inputValue"
+                  :type="attribute.inputType"
+                  :id="attribute.id"
+                  class="form-control"
+                  :disabled="attribute.selectedValue || attribute.type === 'Наименование' || attribute.type === 'Описание'"
+                />
+                <small
+                  >
+                  <span v-if="!attribute.isNumber">Тип: Строка </span>
+                  <span v-if="attribute.isNumber">Тип: Число </span>
+                  <span v-if="attribute.required" class="text-danger">Обязательно </span>
+                  <span v-if="attribute.useOnlyDictionaryValues" class="text-warning">Справочник</span>
+                </small
+                >
+                <div
+                  v-if="
+                    attribute.useOnlyDictionaryValues && attribute.foundValues?.length > 0
+                  "
+                  class="dropdown-attribute-menu"
+                >
+                  <small>Начните вводить данные</small>
+                  <div v-for="value in attribute.foundValues" :key="value.key">
+                    <span
+                      @click="selectAttributeValue(attribute, value)"
+                      class="dropdown-attribute-menu__value"
+                      >{{ value.key }}</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <h5>Характеристики номенклатурной вариации товара</h5>
+              </div>
+              <div
+                class="attribute col-12 col-lg-6 mb-3 position-relative"
+                v-for="attribute in attributesNomenslatureVariation"
+                :key="attribute"
+              >
+                <label for="1" class="form-label"
+                  >ID: {{ attribute.type }}</label
+                >
+                <input
+                  v-model="attribute.inputValue"
+                  :type="attribute.inputType"
+                  :id="attribute.id"
+                  class="form-control"
+                  :disabled="attribute.selectedValue || attribute.type === 'Наименование' || attribute.type === 'Описание'"
+                />
+                <small
+                  >
+                  <span v-if="!attribute.isNumber">Тип: Строка </span>
+                  <span v-if="attribute.isNumber">Тип: Число </span>
+                  <span v-if="attribute.required" class="text-danger">Обязательно </span>
+                  <span v-if="attribute.useOnlyDictionaryValues" class="text-warning">Справочник</span>
+                </small
+                >
+                <div
+                  v-if="
+                    attribute.useOnlyDictionaryValues && attribute.foundValues?.length > 0
+                  "
+                  class="dropdown-attribute-menu"
+                >
+                  <small>Начните вводить данные</small>
+                  <div v-for="value in attribute.foundValues" :key="value.key">
+                    <span
+                      @click="selectAttributeValue(attribute, value)"
+                      class="dropdown-attribute-menu__value"
+                      >{{ value.key }}</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <h5>Характеристики номенклатуры товара</h5>
+              </div>
+              <div
+                class="attribute col-12 col-lg-6 mb-3 position-relative"
+                v-for="attribute in attributesNomenslature"
+                :key="attribute"
+              >
+                <label for="1" class="form-label"
+                  >ID: {{ attribute.type }}</label
                 >
                 <input
                   v-model="attribute.inputValue"
@@ -97,6 +185,8 @@ export default {
   setup(props, { emit }) {
     const store = useStore();
     const attributes = ref([]);
+    const attributesNomenslatureVariation = ref([]);
+    const attributesNomenslature = ref([]);
     const prevAttributes = ref([]);
 
     onMounted(() => {
@@ -104,44 +194,46 @@ export default {
       setInputValueForAttributes();
     });
 
-    watch(
-      attributes,
-      (attributes) => {
-        attributes.forEach(async (attribute) => {
-          if (attribute?.useOnlyDictionaryValues && attribute?.inputValue?.length > 1) {
-            const prevAttribute = prevAttributes.value.find(
-              (prevAttribute) => prevAttribute.type === attribute.type
-            );
-
-            if (!prevAttribute?.inputValue) {
-              setPrevAttributes();
-              return;
-            }
-            
-            if (attribute.inputValue !== prevAttribute.inputValue) {
-              if ((attribute.inputValue.length - prevAttribute.inputValue?.length) > 3) return;
-
-              setPrevAttributes();
-
-              let json = await getAttributeValues(attribute);
-              if (json?.data.length > 0) attribute.foundValues = json.data;
-            }
-          }
-        });
-      },
-      { deep: true }
-    );
+    watch(attributes, attributesWatcher, { deep: true });
+    watch(attributesNomenslatureVariation, attributesWatcher, { deep: true });
+    watch(attributesNomenslature, attributesWatcher, { deep: true });
 
     function toggleModal() {
       emit("toggleModal", props.product.product._id);
     }
 
+    function attributesWatcher(attributes) {
+      attributes.forEach(async (attribute) => {
+        if (attribute?.useOnlyDictionaryValues && attribute?.inputValue?.length > 1) {
+          const prevAttribute = prevAttributes.value.find(
+            (prevAttribute) => prevAttribute.type === attribute.type
+          );
+
+          if (!prevAttribute?.inputValue) {
+            setPrevAttributes();
+            return;
+          }
+          
+          if (attribute.inputValue !== prevAttribute.inputValue) {
+            if ((attribute.inputValue.length - prevAttribute.inputValue?.length) > 3) return;
+
+            setPrevAttributes();
+
+            let json = await getAttributeValues(attribute);
+            if (json?.data.length > 0) attribute.foundValues = json.data;
+          }
+        }
+      });
+    }
+
     function setPrevAttributes() {
-      prevAttributes.value = JSON.parse(JSON.stringify(attributes.value));
+      prevAttributes.value = JSON.parse(JSON.stringify([ ...attributes.value, ...attributesNomenslatureVariation.value, ...attributesNomenslature.value ]));
     }
 
     function getCategoryAttributes() {
       attributes.value = props.product.wildberries.category.addin.filter(attribute => attribute.isAvailable);
+      attributesNomenslatureVariation.value = props.product.wildberries.category.nomenclature.variation.addin.filter(attribute => attribute.isAvailable);
+      attributesNomenslature.value = props.product.wildberries.category.nomenclature.addin.filter(attribute => attribute.isAvailable);
     }
 
     function setInputValueForAttributes() {
@@ -176,11 +268,18 @@ export default {
     }
 
     function saveSelectedAttributes() {
-      emit('selectAttributesForProduct', { product: props.product, attributes: attributes.value });
+      emit('selectAttributesForProduct', {
+        product: props.product,
+        attributes: attributes.value,
+        attributesNomenslatureVariation: attributesNomenslatureVariation.value,
+        attributesNomenslature: attributesNomenslature.value
+      });
     }
 
     return {
       attributes,
+      attributesNomenslatureVariation,
+      attributesNomenslature,
       toggleModal,
       selectAttributeValue,
       saveSelectedAttributes
