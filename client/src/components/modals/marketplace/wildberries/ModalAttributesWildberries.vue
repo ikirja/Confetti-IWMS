@@ -46,13 +46,12 @@
                   <span v-if="!attribute.isNumber">Тип: Строка </span>
                   <span v-if="attribute.isNumber">Тип: Число </span>
                   <span v-if="attribute.required" class="text-danger">Обязательно </span>
-                  <span v-if="attribute.useOnlyDictionaryValues" class="text-warning">Справочник</span>
+                  <span v-if="attribute.useOnlyDictionaryValues" class="text-warning">Справочник </span>
+                  <span @click="resetAttribute(attribute)" v-if="attribute.useOnlyDictionaryValues" class="text-info" role="button">Изменить</span>
                 </small
                 >
                 <div
-                  v-if="
-                    attribute.useOnlyDictionaryValues && attribute.foundValues?.length > 0
-                  "
+                  v-if="attribute.useOnlyDictionaryValues && attribute.foundValues?.length > 0 && attribute.inputValue?.length > 0"
                   class="dropdown-attribute-menu"
                 >
                   <small>Начните вводить данные</small>
@@ -94,9 +93,7 @@
                 </small
                 >
                 <div
-                  v-if="
-                    attribute.useOnlyDictionaryValues && attribute.foundValues?.length > 0
-                  "
+                  v-if="attribute.useOnlyDictionaryValues && attribute.foundValues?.length > 0 && attribute.inputValue?.length > 0"
                   class="dropdown-attribute-menu"
                 >
                   <small>Начните вводить данные</small>
@@ -138,9 +135,7 @@
                 </small
                 >
                 <div
-                  v-if="
-                    attribute.useOnlyDictionaryValues && attribute.foundValues?.length > 0
-                  "
+                  v-if="attribute.useOnlyDictionaryValues && attribute.foundValues?.length > 0 && attribute.inputValue?.length > 0"
                   class="dropdown-attribute-menu"
                 >
                   <small>Начните вводить данные</small>
@@ -276,13 +271,20 @@ export default {
       });
     }
 
+    function resetAttribute(attribute) {
+      delete attribute.selectedValue;
+      delete attribute.params;
+      attribute.inputValue = '';
+    }
+
     return {
       attributes,
       attributesNomenslatureVariation,
       attributesNomenslature,
       toggleModal,
       selectAttributeValue,
-      saveSelectedAttributes
+      saveSelectedAttributes,
+      resetAttribute
     };
   },
 };
