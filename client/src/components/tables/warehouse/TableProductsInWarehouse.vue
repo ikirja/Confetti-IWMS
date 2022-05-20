@@ -424,6 +424,10 @@ export default {
 
       productsInWarehouse.value = await getWarehouseWithProducts({ warehouse: warehouse.value, token: store.state.token });
 
+      sortColumns.value.sku = 'asc';
+      sortByColumn('sku', true);
+      paginateEvent(1);
+
       loading.value = false;
       isLoadingMarketplace.value = false;
     }

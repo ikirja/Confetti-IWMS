@@ -390,6 +390,10 @@ export default {
 
       await getProductsForWarehouse();
 
+      sortColumns.value.sku = 'asc';
+      sortByColumn('sku', true);
+      paginateEvent(1);
+
       loading.value = false;
     }
 
