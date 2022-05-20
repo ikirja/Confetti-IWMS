@@ -45,6 +45,19 @@
       <strong>Успешно!</strong> Обновлено {{ updatedProducts.length }} товара/ов
     </div>
   </div>
+
+  <div class="d-flex justify-content-between mb-2">
+    <div class="d-flex align-items-center">
+      <span class="text-nowrap me-1">Показать по:</span>
+      <select @change="paginateEntries" v-model="currentShowEntries" class="form-select">
+        <option v-for="entry in showEntries" :key="entry" :value="entry">{{ entry }}</option>
+      </select>
+    </div>
+    <div class="d-flex align-items-center">
+      <input @input="searchEvent" v-model="searchInput" type="search" class="form-control" placeholder="Найти" />
+    </div>
+  </div>
+
   <table class="table table-striped table-centered w-100 dt-responsive nowrap">
     <thead class="table-light">
       <tr>
@@ -55,11 +68,11 @@
           </div>
         </th>
         <th>#</th>
-        <th class="all">Товар</th>
+        <th @click.prevent="sortByColumn('title', true)" :class="{ 'asc': sortColumns.title === 'desc', 'desc': sortColumns.title === 'asc'}" role="button" class="all sort">Товар</th>
         <th v-if="marketplaceName">РРЦ</th>
-        <th>Цена</th>
+        <th @click.prevent="sortByColumn('price')" class="sort" :class="{ 'asc': sortColumns.price === 'desc', 'desc': sortColumns.price === 'asc'}" role="button">Цена</th>
         <th>Поступление</th>
-        <th>Кол-во на складе</th>
+        <th @click.prevent="sortByColumn('inStock')" class="sort" :class="{ 'asc': sortColumns.inStock === 'desc', 'desc': sortColumns.inStock === 'asc'}" role="button">Кол-во на складе</th>
         <th v-if="warehouse?.connection === 'ozon-seller-api'">Offer ID</th>
         <th v-if="warehouse?.connection === 'ozon-seller-api' || warehouse?.connection === 'wildberries-seller-api'">Product ID</th>
         <th v-if="marketplaceName" style="width: 250px">Категория</th>
@@ -67,8 +80,11 @@
       </tr>
     </thead>
     <tbody>
+      <tr v-if="filteredProducts.length === 0">
+        <td class="text-center" colspan="10">Нет товаров</td>
+      </tr>
       <tr
-        v-for="(productInWarehouse, index) in productsInWarehouse"
+        v-for="(productInWarehouse, index) in filteredProducts"
         :key="productInWarehouse.product._id"
       >
         <td v-if="!setIsDisabled">
@@ -176,6 +192,29 @@
       </tr>
     </tbody>
   </table>
+
+  <div class="d-flex justify-content-between mb-2">
+    <div class="d-flex align-items-center">
+      <span>С {{ showInfo.from }} по {{ showInfo.to }} из {{ showInfo.total }}</span>
+    </div>
+
+    <div class="d-flex align-items-center">
+      <div class="dataTables_paginate paging_simple_numbers">
+        <ul class="pagination pagination-rounded mb-0">
+          <li class="paginate_button page-item previous" :class="{ 'disabled': currentPage == 1 }">
+            <a @click.prevent="paginateEvent(currentPage - 1)" href="#" class="page-link"><i class="mdi mdi-chevron-left"></i></a>
+          </li>
+          <li v-for="page in showPagination" :key="page" class="paginate_button page-item" :class="{ active: page == currentPage, 'disabled': page === '...' }">
+            <a @click.prevent="paginateEvent(page)" href="#" class="page-link">{{ page }}</a>
+          </li>
+          <li class="paginate_button page-item next" :class="{ 'disabled': currentPage == totalPages }">
+            <a @click.prevent="paginateEvent(currentPage + 1)" href="#" class="page-link"><i class="mdi mdi-chevron-right"></i></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
   <div class="row mb-2" v-if="!setIsDisabled">
     <div class="col-6">
     
@@ -210,6 +249,8 @@ import ModalAttributesWildberries from '@/components/modals/marketplace/wildberr
 import { ref, onMounted, watchEffect, computed } from 'vue';
 import { useStore } from 'vuex';
 
+import { paginateArray, paginateInfo, getTotalPages, pagination, searchInArrayWithProductObj } from '@/modules/helpers/data-table';
+
 import getWarehouseMarketplaceName from '@/modules/warehouse/get-warehouse-marketplace-name';
 import getWarehouseWithProducts from '@/modules/warehouse/get-warehouse-with-products';
 import getSelectedOzonAttributes from '@/modules/warehouse/get-selected-ozon-attributes';
@@ -229,6 +270,23 @@ export default {
     ModalAttributesWildberries
   },
   setup() {
+    const sortColumns = ref({
+      title: 'asc',
+      price: 'asc',
+      inStock: 'asc',
+      sku: 'asc'
+    });
+
+    const showEntries = ref([ 10, 25, 50, 75, 100 ]);
+    const currentShowEntries = ref(10);
+    const currentPage = ref(1);
+    const totalPages = ref(1);
+    const searchInput = ref('');
+    const showInfo = computed(() => paginateInfo(getCurrentProducts(), currentShowEntries.value, currentPage.value));
+    const showPagination = computed(() => pagination(totalPages.value, currentPage.value, 3));
+    const filteredProducts = ref([]);
+    const searchProducts = ref([]);
+
     const store = useStore();
     const warehouse = computed(() => store.state.warehouses.currentWarehouse);
     const marketplaceName = computed(() => getWarehouseMarketplaceName(warehouse.value))
@@ -240,7 +298,12 @@ export default {
     let loading = ref(false);
     let isLoadingMarketplace = ref(false);
 
-    onMounted(async () => productsInWarehouse.value = await getWarehouseWithProducts({ warehouse: warehouse.value, token: store.state.token }));
+    onMounted(async () => {
+      productsInWarehouse.value = await getWarehouseWithProducts({ warehouse: warehouse.value, token: store.state.token });
+
+      sortByColumn('sku', true);
+      totalPages.value = getTotalPages(productsInWarehouse.value, currentShowEntries.value);
+    });
 
     watchEffect(() => {
       if (checkedAll.value) productsInWarehouse.value.forEach(product => product.checked = true);
@@ -364,8 +427,82 @@ export default {
       loading.value = false;
       isLoadingMarketplace.value = false;
     }
+
+    function getCurrentProducts() {
+      if (searchProducts.value.length <= 0) return productsInWarehouse.value;
+      return searchProducts.value;
+    }
+
+    function paginateEntries() {  
+      if (searchInput.value.length >= 1) {
+        searchProducts.value = searchInArrayWithProductObj(productsInWarehouse.value, searchInput.value);
+        filteredProducts.value = paginateArray(searchProducts.value, currentShowEntries.value, currentPage.value);
+        totalPages.value = getTotalPages(searchProducts.value, currentShowEntries.value);
+      } else {
+        searchProducts.value = [];
+        filteredProducts.value = paginateArray(productsInWarehouse.value, currentShowEntries.value, currentPage.value);
+        totalPages.value = getTotalPages(productsInWarehouse.value, currentShowEntries.value);
+      }
+    }
+
+    function paginateEvent(page) {
+      currentPage.value = page;
+      paginateEntries();
+    }
+
+    function searchEvent() {
+      currentPage.value = 1;
+      paginateEntries();
+    }
+
+    function sortByColumn(dataType, inProductObj = false) {
+      const currentProducts = getCurrentProducts();
+      let sortType = sortColumns.value[dataType];
+      
+      if (sortType === 'asc') {
+        currentProducts.sort((a, b) => {
+          if (inProductObj) {
+            if (a.product[dataType] < b.product[dataType]) return -1;
+            if (a.product[dataType] > b.product[dataType]) return 1;
+          } else {
+            if (a[dataType] < b[dataType]) return -1;
+            if (a[dataType] > b[dataType]) return 1;
+          }
+          
+          return 0;
+        });
+      }
+
+      if (sortType === 'desc') {
+        currentProducts.sort((a, b) => {
+          if (inProductObj) {
+            if (a.product[dataType] > b.product[dataType]) return -1;
+            if (a.product[dataType] < b.product[dataType]) return 1;
+          } else {
+            if (a[dataType] > b[dataType]) return -1;
+            if (a[dataType] < b[dataType]) return 1;
+          }
+          
+          return 0;
+        });
+      }
+
+      sortType === 'asc' ? sortColumns.value[dataType] = 'desc' : sortColumns.value[dataType] = 'asc';
+
+      searchProducts.value = currentProducts;
+      paginateEntries();
+    }
     
     return {
+      sortColumns,
+      showEntries,
+      currentShowEntries,
+      showInfo,
+      showPagination,
+      currentPage,
+      totalPages,
+      searchInput,
+      filteredProducts,
       warehouse,
       marketplaceName,
       productsInWarehouse,
@@ -383,8 +520,28 @@ export default {
       addToMarketplace,
       setImtId,
       updateProductsToMarketplace,
-      setProducts
+      setProducts,
+      paginateEntries,
+      paginateEvent,
+      searchEvent,
+      sortByColumn
     }
   },
 }
 </script>
+
+<style scoped>
+.sort {
+  position: relative;
+}
+.sort.asc::after {
+  content: url('/assets/images/icons/angle-up.svg');
+  position: absolute;
+  width: 20px;
+}
+.sort.desc::after {
+  content: url('/assets/images/icons/angle-down.svg');
+  position: absolute;
+  width: 20px;
+}
+</style>
