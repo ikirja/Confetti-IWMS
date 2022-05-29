@@ -273,8 +273,12 @@ export default {
       attribute.foundValues = [];
       attribute.inputValue = '';
 
-      const foundParam = attribute.params.find(param => param.value === value.key);
-      if (!foundParam) attribute.params.push({ value: value.key });
+      if (attribute.params && attribute.params.length > 0) {
+        const foundParam = attribute.params.find(param => param.value === value.key);
+        if (!foundParam) attribute.params.push({ value: value.key });
+      } else {
+        attribute.params = [ { value: value.key } ];
+      }
     }
 
     function removeValueFromAttribute(attribute, param) {
