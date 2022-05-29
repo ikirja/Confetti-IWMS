@@ -40,6 +40,7 @@ function getSelectedAttributes(product, attributes) {
 
     if (attribute.isNumber && attribute.inputValue > 0) attribute.params = [ { count: Number(attribute.inputValue) } ];
     if (!attribute.isNumber && attribute.inputValue?.length > 0) attribute.params = [ { value: attribute.inputValue } ];
+    if (!attribute.useOnlyDictionaryValues && attribute.inputValue?.length === 0) delete attribute.params;
 
     if (attribute.required) {
       if (attribute.useOnlyDictionaryValues && (!attribute.params || attribute.params.length === 0)) isSet = false;

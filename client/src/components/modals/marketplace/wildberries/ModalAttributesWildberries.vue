@@ -90,6 +90,13 @@
                   class="form-control"
                   :disabled="checkIfAvailable(attribute)"
                 />
+                <div v-if="attribute.useOnlyDictionaryValues && !checkIfAvailable(attribute)" class="attribute-params">
+                  <span v-for="param in attribute.params" :key="param" class="badge badge-dark-lighten me-1">
+                    <span v-if="param.value">{{ param.value }}</span>
+                    <span v-if="param.count">{{ param.count }}</span>
+                    <span @click.prevent="removeValueFromAttribute(attribute, param)" class="attribute-params__remove"><i class="uil-multiply"></i></span>
+                  </span>
+                </div>
                 <small
                   >
                   <span v-if="!attribute.isNumber">Тип: Строка </span>
@@ -132,6 +139,13 @@
                   class="form-control"
                   :disabled="checkIfAvailable(attribute)"
                 />
+                <div v-if="attribute.useOnlyDictionaryValues && !checkIfAvailable(attribute)" class="attribute-params">
+                  <span v-for="param in attribute.params" :key="param" class="badge badge-dark-lighten me-1">
+                    <span v-if="param.value">{{ param.value }}</span>
+                    <span v-if="param.count">{{ param.count }}</span>
+                    <span @click.prevent="removeValueFromAttribute(attribute, param)" class="attribute-params__remove"><i class="uil-multiply"></i></span>
+                  </span>
+                </div>
                 <small
                   >
                   <span v-if="!attribute.isNumber">Тип: Строка </span>
