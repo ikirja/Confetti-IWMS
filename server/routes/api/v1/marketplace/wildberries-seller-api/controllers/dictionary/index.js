@@ -4,10 +4,10 @@ const ErrorData = require(__basedir + '/server/lib/error-handler').getErrorData(
 
 module.exports = async (req, res) => {
   try {
-    const { url, top, pattern } = req.body;
-    if (!url || !top || !pattern) return res.status(422).json({ error: [ { message: ErrorData.common.checkData } ] });
+    const { url, query } = req.body;
+    if (!url || !query || typeof query !== 'object') return res.status(422).json({ error: [ { message: ErrorData.common.checkData } ] });
 
-    const dictionaryResponse = await dictionary.get({ url, top, pattern });
+    const dictionaryResponse = await dictionary.get({ url, query });
     res.status(200).json(dictionaryResponse);
   } catch (err) {
     logger.createLog({

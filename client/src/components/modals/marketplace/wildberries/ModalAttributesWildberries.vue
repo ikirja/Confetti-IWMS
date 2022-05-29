@@ -39,15 +39,21 @@
                   :type="attribute.inputType"
                   :id="attribute.id"
                   class="form-control"
-                  :disabled="attribute.selectedValue || attribute.type === 'Наименование' || attribute.type === 'Описание'"
+                  :disabled="checkIfAvailable(attribute)"
                 />
+                <div v-if="attribute.useOnlyDictionaryValues && !checkIfAvailable(attribute)" class="attribute-params">
+                  <span v-for="param in attribute.params" :key="param" class="badge badge-dark-lighten me-1">
+                    <span v-if="param.value">{{ param.value }}</span>
+                    <span v-if="param.count">{{ param.count }}</span>
+                    <span @click.prevent="removeValueFromAttribute(attribute, param)" class="attribute-params__remove"><i class="uil-multiply"></i></span>
+                  </span>
+                </div>
                 <small
                   >
                   <span v-if="!attribute.isNumber">Тип: Строка </span>
                   <span v-if="attribute.isNumber">Тип: Число </span>
                   <span v-if="attribute.required" class="text-danger">Обязательно </span>
                   <span v-if="attribute.useOnlyDictionaryValues" class="text-warning">Справочник </span>
-                  <span @click="resetAttribute(attribute)" v-if="attribute.useOnlyDictionaryValues" class="text-info" role="button">Изменить</span>
                 </small
                 >
                 <div
@@ -82,7 +88,7 @@
                   :type="attribute.inputType"
                   :id="attribute.id"
                   class="form-control"
-                  :disabled="attribute.selectedValue || attribute.type === 'Наименование' || attribute.type === 'Описание'"
+                  :disabled="checkIfAvailable(attribute)"
                 />
                 <small
                   >
@@ -124,7 +130,7 @@
                   :type="attribute.inputType"
                   :id="attribute.id"
                   class="form-control"
-                  :disabled="attribute.selectedValue || attribute.type === 'Наименование' || attribute.type === 'Описание'"
+                  :disabled="checkIfAvailable(attribute)"
                 />
                 <small
                   >
@@ -186,7 +192,7 @@ export default {
 
     onMounted(() => {
       getCategoryAttributes();
-      setInputValueForAttributes();
+      setInputTypeForAttributes();
     });
 
     watch(attributes, attributesWatcher, { deep: true });
@@ -231,14 +237,12 @@ export default {
       attributesNomenslature.value = props.product.wildberries.category.nomenclature.addin.filter(attribute => attribute.isAvailable);
     }
 
-    function setInputValueForAttributes() {
+    function setInputTypeForAttributes() {
       attributes.value.forEach((attribute) => {
         if (attribute.isNumber) {
           attribute.inputType = "number";
-          attribute.inputValue = attribute.params && attribute.params[0].count ? attribute.params[0].count : 0;
         } else {
           attribute.inputType = "text";
-          attribute.inputValue = attribute.params && attribute.params[0].value ? attribute.params[0].value : '';
         }
       });
     }
@@ -246,20 +250,36 @@ export default {
     async function getAttributeValues(attribute) {
       if (!attribute.useOnlyDictionaryValues) return null;
 
-      const url = '/api/v1/marketplace/wildberries/dictionary';
-      const json = await request(url, 'POST', store.state.token, {
+      let body = {
         url: attribute.dictionary,
-        top: 100,
-        pattern: attribute.inputValue
-      });
+        query: {
+          top: 100,
+          pattern: attribute.inputValue
+        }
+      }
+
+      if (attribute.dictionary === '/ext') {
+        body.query.lang = 'ru',
+        body.query.option = attribute.type
+      }
+
+      const url = '/api/v1/marketplace/wildberries/dictionary';
+      const json = await request(url, 'POST', store.state.token, body);
 
       return json;
     }
 
     function selectAttributeValue(attribute, value) {
       attribute.foundValues = [];
-      attribute.inputValue = value.key;
-      attribute.selectedValue = value;
+      attribute.inputValue = '';
+
+      const foundParam = attribute.params.find(param => param.value === value.key);
+      if (!foundParam) attribute.params.push({ value: value.key });
+    }
+
+    function removeValueFromAttribute(attribute, param) {
+      const foundIndex = attribute.params.findIndex(paramInAttribute => paramInAttribute.value === param.value);
+      if (foundIndex !== -1) attribute.params.splice(foundIndex, 1);
     }
 
     function saveSelectedAttributes() {
@@ -271,10 +291,15 @@ export default {
       });
     }
 
-    function resetAttribute(attribute) {
-      delete attribute.selectedValue;
-      delete attribute.params;
-      attribute.inputValue = '';
+    function checkIfAvailable(attribute) {
+      if (
+        attribute.type === 'Наименование' ||
+        attribute.type === 'Описание'
+      ) {
+        return true;
+      } else {
+        return false;
+      }
     }
 
     return {
@@ -283,14 +308,19 @@ export default {
       attributesNomenslature,
       toggleModal,
       selectAttributeValue,
+      removeValueFromAttribute,
       saveSelectedAttributes,
-      resetAttribute
+      checkIfAvailable
     };
   },
 };
 </script>
 
 <style scoped>
+.attribute-params__remove {
+  cursor: pointer;
+}
+
 .dropdown-attribute-menu {
   position: absolute;
   top: 90px;
