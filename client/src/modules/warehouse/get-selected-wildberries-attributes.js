@@ -53,5 +53,15 @@ function getSelectedAttributes(product, attributes) {
     addins.push(attribute);
   });
 
+  // PRODUCT NAME HACK IF THERE'S NO ADDING CALLED НАИМЕНОВАНИЕ
+  const attributeProductName = attributes.find(attr => attr.type === 'Наименование');
+
+  if (!attributeProductName) {
+    addins.push({
+      type: 'Наименование',
+      params: [ { value: product.product.title } ]
+    });
+  }
+
   return { isSet, addins };
 }
