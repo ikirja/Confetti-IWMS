@@ -40,6 +40,7 @@
               <Table 
                 :columns="columns"
                 :entries="entries"
+                :isLoading="isLoading"
               />
             </div>
           </div>
@@ -102,6 +103,7 @@ export default {
       }
     ];
     const entries = ref([]);
+    let isLoading = false;
     let show = ref({
       tableRegistries: true,
       tableRegistry: false
@@ -120,6 +122,8 @@ export default {
     }
 
     async function getRegistries() {
+      isLoading = true;
+
       const url = '/api/v1/registry';
       let jsonData = await request(url, 'GET', store.state.token);
       jsonData = jsonData.filter(entry => entry.type === 'ozon');
@@ -163,11 +167,14 @@ export default {
           data
         }
       });
+
+      isLoading = false;
     }
 
     return {
       columns,
       entries,
+      isLoading,
       show,
       changeShow
     }

@@ -3,7 +3,9 @@ const logger = require(__basedir + '/server/lib/logger');
 
 module.exports = async (req, res) => {
   try {
-    const registries = await Registry.find().sort('-createdAt');
+    const currentDate = new Date();
+ 
+    const registries = await Registry.find({ createdAt: { $gte: currentDate.setDate(currentDate.getDate() - 30) }}).sort('-createdAt');
     res.status(200).json(registries);
   } catch (err) {
     logger.createLog({

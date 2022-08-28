@@ -40,6 +40,7 @@
               <Table 
                 :columns="columns"
                 :entries="entries"
+                :isLoading="isLoading"
               />
             </div>
           </div>
@@ -102,6 +103,7 @@ export default {
       }
     ];
     const entries = ref([]);
+    let isLoading = ref(false);
     let show = ref({
       tableRegistries: true,
       tableRegistry: false
@@ -120,16 +122,21 @@ export default {
     }
 
     async function getRegistries() {
+      isLoading = true;
+
       const url = '/api/v1/registry';
       const jsonData = await request(url, 'GET', store.state.token);
       entries.value = jsonData.map(entry => {
         return { createdAt: entry.createdAt, updatedAt: entry.updatedAt, type: entry.type, title: entry.title, fields: entry.fields }
       });
+
+      isLoading = false;
     }
 
     return {
       columns,
       entries,
+      isLoading,
       show,
       changeShow
     }

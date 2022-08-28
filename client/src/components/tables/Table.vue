@@ -13,6 +13,16 @@
       </tr>
     </thead>
     <tbody>
+      <tr v-if="isLoading">
+        <td :colspan="columns.length" class="text-center">
+          <div class="spinner-grow text-primary" role="status"></div>
+        </td>
+      </tr>
+      <tr v-else-if="entries.length === 0">
+        <td :colspan="columns.length" class="text-center">
+          <div>Данные не найдены</div>
+        </td>
+      </tr>
       <tr v-for="entry in entries" :key="entry">
         <!-- <td>
           <div class="form-check">
@@ -44,7 +54,7 @@
 import { getCurrentInstance } from "vue";
 
 export default {
-  props: ["columns", "entries", "actions"],
+  props: ["columns", "entries", "isLoading", "actions"],
   setup() {
     const internalInstance = getCurrentInstance();
     const moment = internalInstance.appContext.config.globalProperties.$moment;
