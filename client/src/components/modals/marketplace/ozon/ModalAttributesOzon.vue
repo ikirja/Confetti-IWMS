@@ -47,7 +47,8 @@
                   <span v-if="attribute.type === 'Decimal' || attribute.type === 'Integer'">Тип: Число </span>
                   <span v-if="attribute.type === 'Boolean'">Тип: Булево </span>
                   <span v-if="attribute.is_required" class="text-danger">Обязательно </span>
-                  <span v-if="attribute.is_collection" class="text-warning">Справочник</span>
+                  <span v-if="attribute.is_collection" class="text-warning">Справочник </span>
+                  <span @click="resetAttribute(attribute)" v-if="attribute.is_collection" class="text-info" role="button">Изменить</span>
                 </small
                 >
                 <div
@@ -182,6 +183,7 @@ export default {
         attribute.foundValues = [];
         attribute.selectedValue = null;
         attribute.isLoading = false;
+
         if (
           attribute.type === "String" ||
           attribute.type === "URL" ||
@@ -209,7 +211,12 @@ export default {
           attribute.is_required = true;
         }
 
-        // if (attribute.is_collection && foundValueInProduct) attribute.selectedValue = foundValueInProduct.values[0];
+        if (attribute.is_collection && foundValueInProduct) {
+          attribute.selectedValue = {
+            id: foundValueInProduct.values[0].dictionary_value_id,
+            value: foundValueInProduct.values[0].value
+          }
+        }
       });
     }
 
@@ -239,11 +246,18 @@ export default {
       emit('selectAttributesForProduct', { product: props.product, attributes: attributes.value });
     }
 
+    function resetAttribute(attribute) {
+      attribute.foundValues = [];
+      attribute.inputValue = '';
+      attribute.selectedValue = null;
+    }
+
     return {
       attributes,
       toggleModal,
       selectAttributeValue,
-      saveSelectedAttributes
+      saveSelectedAttributes,
+      resetAttribute
     };
   },
 };
