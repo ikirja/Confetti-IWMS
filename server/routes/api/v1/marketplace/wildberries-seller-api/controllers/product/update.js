@@ -32,6 +32,18 @@ module.exports = async (req, res) => {
     const addin = getAddinArray(filteredAddin);
     const nomenclatureVariationAddin = getAddinArray(filteredNomenclatureVariationAddin);
 
+    const foundNameAddinIndex = addin.findIndex(addin => addin.type === 'Наименование');
+    if (foundNameAddinIndex === -1) {
+      addin.push({
+        type: 'Наименование',
+        params: [
+          {
+            value: foundProductInWarehouse.product.title
+          }
+        ]
+      })
+    }
+
     const photos = await sendProductPhotos(foundProductInWarehouse);
 
     WB_CARD.object = foundProductInWarehouse.wildberries.category.name;
