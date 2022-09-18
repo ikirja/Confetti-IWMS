@@ -113,7 +113,6 @@
                   type="number"
                   class="form-control"
                   v-model="productEdit.purchasePrice"
-                  disabled
                 />
               </div>
               <div class="col-12 text-start mb-3">
@@ -126,6 +125,11 @@
                   class="form-control"
                   v-model="productEdit.description"
                 ></textarea>
+                <div class="text-end">
+                  <small class="" :class="{ 'text-danger': productEdit.description.length > descriptionLimit }">
+                    <span>{{ productEdit.description.length }}</span> / {{ descriptionLimit }}
+                  </small>
+                </div>
               </div>
             </div>
           </div>
@@ -176,6 +180,7 @@ export default {
       description: '',
       purchasePrice: 0
     });
+    const descriptionLimit = ref(1000);
 
     watchEffect(() => {
       if (props.show) {
@@ -208,6 +213,7 @@ export default {
 
     return {
       productEdit,
+      descriptionLimit,
       setProduct,
       toggleModal
     };
