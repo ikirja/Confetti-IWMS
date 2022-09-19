@@ -17,6 +17,7 @@
     <thead class="table-light">
       <tr>
         <th @click.prevent="sortByColumn('title')" class="all sort" :class="{ 'asc': sortColumns.title === 'desc', 'desc': sortColumns.title === 'asc'}" role="button">Название</th>
+        <th>Фото</th>
         <th @click.prevent="sortByColumn('createdAt')" class="sort" :class="{ 'asc': sortColumns.createdAt === 'desc', 'desc': sortColumns.createdAt === 'asc'}" role="button">Создан</th>
         <th @click.prevent="sortByColumn('updatedAt')" class="sort" :class="{ 'asc': sortColumns.updatedAt === 'desc', 'desc': sortColumns.updatedAt === 'asc'}" role="button">Обновлён</th>
         <th @click.prevent="sortByColumn('sku')" class="sort" :class="{ 'asc': sortColumns.sku === 'desc', 'desc': sortColumns.sku === 'asc' }" role="button">Артикул</th>
@@ -37,14 +38,6 @@
         :key="product._id"
       >
         <td>
-          <img
-            v-if="product.image"
-            :src="'/upload/' + product.image.file + '.jpg'"
-            alt="contact-img"
-            title="contact-img"
-            class="rounded me-3"
-            height="48"
-          />
           <p class="m-0 d-inline-block align-middle font-16">
             <a href="#" class="text-body">{{ product.title }}</a>
             <br />
@@ -54,6 +47,16 @@
             <span class="text-warning mdi mdi-star"></span>
             <span class="text-warning mdi mdi-star"></span>
           </p>
+        </td>
+        <td>
+          <img
+            v-if="product.image"
+            :src="'/upload/' + product.image.file + '.jpg'"
+            alt="contact-img"
+            title="contact-img"
+            class="rounded me-3"
+            height="48"
+          />
         </td>
         <td>{{ moment(product.createdAt).format("DD/MM/YYYY") }}</td>
         <td>{{ moment(product.updatedAt).format("DD/MM/YYYY") }}</td>
