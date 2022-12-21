@@ -1,6 +1,6 @@
 const FormData = require('form-data');
 const fetch = require('node-fetch');
-const config = require('../../config');
+const config = require('../../../config');
 
 module.exports = async function photo({ uuid, photoBinary }) {
   let formData = new FormData();
