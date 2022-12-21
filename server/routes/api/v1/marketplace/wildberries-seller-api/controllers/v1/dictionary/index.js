@@ -1,4 +1,4 @@
-const { dictionary } = require (__basedir + '/server/lib/marketplace/wildberries-seller-api');
+const { dictionary } = require (__basedir + '/server/lib/marketplace/wildberries-seller-api').v1;
 const logger = require(__basedir + '/server/lib/logger');
 const ErrorData = require(__basedir + '/server/lib/error-handler').getErrorData();
 

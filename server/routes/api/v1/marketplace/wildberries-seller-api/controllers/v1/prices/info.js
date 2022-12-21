@@ -1,4 +1,4 @@
-const { prices } = require (__basedir + '/server/lib/marketplace/wildberries-seller-api');
+const { prices } = require (__basedir + '/server/lib/marketplace/wildberries-seller-api').v1;
 
 module.exports = async (req, res) => {
   try {

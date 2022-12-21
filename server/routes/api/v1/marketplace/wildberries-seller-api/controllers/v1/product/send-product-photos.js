@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const fs = require('fs');
-const { product } = require (__basedir + '/server/lib/marketplace/wildberries-seller-api');
+const { product } = require (__basedir + '/server/lib/marketplace/wildberries-seller-api').v1;
 
 module.exports = async function sendProductPhotos(productInWarehouse) {
   const mainImage = productInWarehouse.product.image;

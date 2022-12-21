@@ -1,6 +1,6 @@
 const Warehouse = require(__basedir + '/server/models/warehouse');
 const Registry = require(__basedir + '/server/models/registry');
-const { product } = require (__basedir + '/server/lib/marketplace/wildberries-seller-api');
+const { product } = require (__basedir + '/server/lib/marketplace/wildberries-seller-api').v1;
 const validateProductStocks = require('./validate-product-stocks');
 const logger = require(__basedir + '/server/lib/logger');
 

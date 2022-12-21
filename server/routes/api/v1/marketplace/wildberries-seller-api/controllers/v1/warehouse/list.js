@@ -1,5 +1,5 @@
 const Warehouse = require(__basedir + '/server/models/warehouse');
-const { warehouse } = require (__basedir + '/server/lib/marketplace/wildberries-seller-api');
+const { warehouse } = require(__basedir + '/server/lib/marketplace/wildberries-seller-api').v1;
 
 module.exports = async (req, res) => {
   try {
