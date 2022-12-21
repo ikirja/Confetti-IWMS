@@ -108,6 +108,7 @@ router.post('/marketplace/wildberries/v1/product/update', authController.middlew
 router.post('/marketplace/wildberries/v1/warehouse-list', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.warehouse.list);
 
 // Wildberries Seller Api V2
-router.get('/marketplace/wildberries/v2/get-categories', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v2.category.getCategories);
+router.get('/marketplace/wildberries/v2/category/get-categories', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v2.category.getCategories);
+router.post('/marketplace/wildberries/v2/characteristics/get-characteristics-by-category', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v2.characteristics.getCharacteristicsByCategory);
 
 module.exports = router;

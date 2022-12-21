@@ -30,6 +30,9 @@ const v1 = {
 const v2 = {
   category: {
     getCategories: require('./controllers/v2/category/get-categories')
+  },
+  characteristics: {
+    getCharacteristicsByCategory: require('./controllers/v2/characteristics/get-characteristics-by-category')
   }
 }
 
