@@ -86,6 +86,24 @@ const warehouseSchema = new Schema({
           type: Number,
           default: 0
         }
+      },
+      wildberriesV2: {
+        category: {
+          type: Object,
+          default: {}
+        },
+        vendorCode: {
+          type: String,
+          default: ''
+        },
+        characteristics: {
+          type: Array,
+          default: []
+        },
+        sizes: {
+          type: Array,
+          default: []
+        }
       }
     }
   ],
