@@ -92,19 +92,22 @@ router.post('/marketplace/ozon/product-stocks', authController.middleware.isAdmi
 router.post('/marketplace/ozon/product-prices', authController.middleware.isAdmin, marketplace.ozonSellerApi.productPrices);
 router.post('/marketplace/ozon/warehouse-list', authController.middleware.isAdmin, marketplace.ozonSellerApi.warehouseList);
 
-// Wildberries Seller Api
-router.get('/marketplace/wildberries/get-category-parent', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.category.getParent);
-router.post('/marketplace/wildberries/get-category-by-parent', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.category.getByParent);
-router.get('/marketplace/wildberries/get-config', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.config.get);
-router.post('/marketplace/wildberries/set-config', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.config.set);
-router.post('/marketplace/wildberries/dictionary', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.dictionary.get);
-router.get('/marketplace/wildberries/prices/info', marketplace.wildberriesSellerApi.prices.info);
-router.post('/marketplace/wildberries/prices/update', marketplace.wildberriesSellerApi.prices.update);
-router.post('/marketplace/wildberries/product/create', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.product.create);
-router.post('/marketplace/wildberries/product/list', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.product.list);
-router.post('/marketplace/wildberries/product/set-imt-id', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.product.setImtId);
-router.post('/marketplace/wildberries/product/stocks', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.product.stocks);
-router.post('/marketplace/wildberries/product/update', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.product.update);
-router.post('/marketplace/wildberries/warehouse-list', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.warehouse.list);
+// Wildberries Seller Api V1
+router.get('/marketplace/wildberries/v1/get-category-parent', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.category.getParent);
+router.post('/marketplace/wildberries/v1/get-category-by-parent', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.category.getByParent);
+router.get('/marketplace/wildberries/v1/get-config', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.config.get);
+router.post('/marketplace/wildberries/v1/set-config', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.config.set);
+router.post('/marketplace/wildberries/v1/dictionary', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.dictionary.get);
+router.get('/marketplace/wildberries/v1/prices/info', marketplace.wildberriesSellerApi.v1.prices.info);
+router.post('/marketplace/wildberries/v1/prices/update', marketplace.wildberriesSellerApi.v1.prices.update);
+router.post('/marketplace/wildberries/v1/product/create', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.product.create);
+router.post('/marketplace/wildberries/v1/product/list', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.product.list);
+router.post('/marketplace/wildberries/v1/product/set-imt-id', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.product.setImtId);
+router.post('/marketplace/wildberries/v1/product/stocks', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.product.stocks);
+router.post('/marketplace/wildberries/v1/product/update', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.product.update);
+router.post('/marketplace/wildberries/v1/warehouse-list', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v1.warehouse.list);
+
+// Wildberries Seller Api V2
+router.get('/marketplace/wildberries/v2/get-categories', authController.middleware.isAdmin, marketplace.wildberriesSellerApi.v2.category.getCategories);
 
 module.exports = router;

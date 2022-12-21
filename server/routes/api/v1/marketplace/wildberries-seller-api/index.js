@@ -26,6 +26,13 @@ const v1 = {
   }
 }
 
+const v2 = {
+  category: {
+    getCategories: require('./controllers/v2/category/get-categories')
+  }
+}
+
 module.exports = {
-  v1
+  v1,
+  v2
 }
